@@ -2,7 +2,9 @@
 
 A powerful, keyboard-driven Terminal User Interface ([TUI](https://en.wikipedia.org/wiki/Text-based_user_interface)) for managing your **todo.txt** file.
 
-![](screenshot goes here)
+Skip to [Installation](#installation) (pip3).
+
+![Screenshot](screenshot.png)
 
 ## Features
 
@@ -98,27 +100,23 @@ And display like this:
 ![Reconstructed task](reconstructed-task.png)
 
 
-## Nice to know
-
-**Syncing**  f
-TodoTxtTUI detects and reflects changes made to todo.txt outside the application, allowing you to work on your todo.txt file from multiple devices.
-
-**Original idea**  
-Read more about todo.txt at [todotxt.org](http://todotxt.org/). Gina Trapani originally came up with the idea. It has since been extended, e.g. with recurring tasks and other features.
-
-
 ## Installation
 
 ```
 pip3 install todo-txt-tui
 ```
 
-### Usage
-
-```
-todo-txt-tui ~/path/to/todo.txt
-```
-
 You will be notified if a new version is available.
 
-On linux you can create an alias to speed things up. Example: `todo-txt-tui ~/path/to/todo.txt'`. Then you can simply type `todo` in your terminal and the app will start and open your preferred todo.txt list. Combine that with scratchpad and you're flying!
+## Usage
+
+```
+todo-txt-tui /path/to/todo.txt
+```
+
+On linux you can create an alias to speed things up. Example: `alias todo="todo-txt-tui /path/to/todo.txt"`. Then you can simply type `todo` in your terminal and the app will start and open your preferred todo.txt list.
+
+---
+
+**Original idea**  
+Read more about todo.txt at [todotxt.org](http://todotxt.org/). Gina Trapani originally came up with the idea. It has since been extended, e.g. with recurring tasks and other features.
