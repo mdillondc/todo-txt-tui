@@ -10,7 +10,7 @@ import asyncio
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 __package__ = 'todo-txt-tui'
 __sync_refresh_rate__ = 2
 
@@ -20,7 +20,8 @@ async def check_for_updates(keymap_instance):
     try:
         # Fetch the latest version
         async with aiohttp.ClientSession() as session:
-            async with session.get(f'https://test.pypi.org/pypi/{__package__}/json') as response:
+            # async with session.get(f'https://test.pypi.org/pypi/{__package__}/json') as response:
+            async with session.get(f'https://pypi.org/pypi/{__package__}/json') as response:
                 if response.status != 200:
                     return  # Exit if the response status is not 200 OK
                 latest_version_info = await response.json()

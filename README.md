@@ -29,7 +29,7 @@ Skip to [Installation](#installation) (pip3).
 - `G`: Go to bottom of list
 - `n`: Add new task (`enter` to save, `esc` to dismiss)
 - `e`: Edit existing task (`enter` to save, `esc` to dismiss)
-  - `tab`: Autocomplete suggested [projects/contexts](link here)
+  - `tab`: Autocomplete suggested
 - `x`: Toggle task complete/incomplete
 - `X`: Complete and archive task immediately
 - `A`: Archive completed tasks to done.txt
@@ -64,8 +64,8 @@ Convert natural language like `due:tomorrow` into the correct yyyy-mm-dd formatt
 * `due:tue` or `due:tuesday`: Set date to the upcoming Tuesday (works for all days).
 * `due:nw` or `due:nextweek`: Monday the following week.
 * `due:nm` or `due:nextmonth`: 1st of next month.
-* `due:10jan`: Upcoming January 10th
-* `due:10jan2027`: January 10th, 2027
+* `due:10jan`: Upcoming January 10th.
+* `due:10jan2027`: January 10th, 2027.
 
 ## Recurring tasks
 
@@ -76,7 +76,7 @@ Recurrences can be specified in: `d` (days), `w` (weeks), `m` (months), `y` (yea
 **Strict recurrence**  
 Use the `+` symbol. When completing the task, a new task will be created 5 days after the tasks' due date regardless of the date when you complete the task. Useful for keeping track of birthday's and similar things where the recurrence date must always fall on the same date regardless of when you complete the task.
 
-Example: `(A) Marie +birthday @home due:2023-10-30 rec:+1y`. Marie's birthday will be repeated on Oct. 30th every year.
+Example: `(A) Marie +birthday @home due:2023-10-30 rec:+1y`. Marie's birthday will repeat on Oct. 30th every year.
 
 ## Projects and Contexts
 
