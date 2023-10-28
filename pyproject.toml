@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+
+[project]
+name = 'todo-txt-tui'
+version = '0.0.1'
+description = 'A keyboard-driven terminal application for managing todo.txt files.'
+readme = "README.md"
+authors = [{name = 'mdmdc'}]
+dependencies = [
+    "urwid",
+    "python-dateutil",
+    "aiohttp"
+]
+
+[project.scripts]
+todo-txt-tui = "todo_txt_tui.core:entry_point"
