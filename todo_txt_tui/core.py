@@ -320,6 +320,9 @@ class Tasks:
         # Flag to check if a task has been toggled (completed/uncompleted)
         task_toggled = False
 
+        # Current date of completion (today's date)
+        completion_date = datetime.now().date()
+
         # Loop through each task
         for i, task in enumerate(tasks):
             # Remove leading and trailing whitespaces
@@ -349,13 +352,16 @@ class Tasks:
                     # Extract recurrence value
                     recurrence_value = re.search(RECURRENCE_REGEX, stripped_task).group(1)
 
+                    # Check if the recurrence is strict (starts with '+')
+                    is_strict = recurrence_value.startswith('+')
+
                     # Extract old due date if present
                     due_date_match = re.search(DUE_DATE_REGEX, stripped_task)
-                    old_due_date = datetime.strptime(due_date_match.group(1),
-                                                     '%Y-%m-%d').date() if due_date_match else None
+                    old_due_date = datetime.strptime(due_date_match.group(1), '%Y-%m-%d').date() if due_date_match else None
 
                     # Calculate new due date based on recurrence
-                    base_date = old_due_date if old_due_date else datetime.now().date()
+                    base_date = old_due_date if is_strict and old_due_date else completion_date
+
                     amount = int(re.match(r"\+?(\d+)", recurrence_value).group(1))
                     unit = recurrence_value[-1]
                     unit_mapping = {'d': 'days', 'w': 'weeks', 'm': 'months', 'y': 'years'}
@@ -365,8 +371,7 @@ class Tasks:
                     new_due_date_str = new_due_date.strftime('%Y-%m-%d')
 
                     # Create new task with updated due date
-                    new_task = re.sub(DUE_DATE_REGEX, f'due:{new_due_date_str}',
-                                      stripped_task) if old_due_date else stripped_task + f' due:{new_due_date_str}'
+                    new_task = re.sub(DUE_DATE_REGEX, f'due:{new_due_date_str}', stripped_task) if old_due_date else stripped_task + f' due:{new_due_date_str}'
 
                     # Add the new task to recurring_tasks if it doesn't already exist
                     if not self.task_already_exists(new_task):
@@ -377,6 +382,8 @@ class Tasks:
         # Write the updated tasks back to the file
         with open(self.txt_file, 'w') as f:
             f.write('\n'.join(modified_tasks + recurring_tasks))
+
+
 
     # Archives completed tasks to a 'done.txt' file and removes them from the original file
     def archive(self):
