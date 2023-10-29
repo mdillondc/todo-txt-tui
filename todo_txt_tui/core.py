@@ -10,7 +10,7 @@ import asyncio
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 __package__ = 'todo-txt-tui'
 __sync_refresh_rate__ = 2
 
