@@ -47,12 +47,12 @@ async def check_for_updates(keymap_instance):
 
                     os.system('clear')
                     sys.exit(
-                        f"\nUpdate completed.\nIf the update failed, update manually: pip3 install --upgrade -i {__package__}")
+                        f"\nUpdate completed.\nIf the update failed, update manually: pip3 install --upgrade {__package__}")
                 if key in ['esc']:
                     keymap_instance.main_frame.body = keymap_instance.tasklist_decorations
 
             text_widget = urwid.Text(
-                f"A new version ({latest_version}) is available. Press ENTER to install (ESC to dismiss).\n\nAlternatively, update manually: pip3 install --upgrade -i {__package__}\n\nChangelog: https://github.com/mdillondc/todo-txt-tui/commits/")
+                f"A new version ({latest_version}) is available. Press ENTER to install (ESC to dismiss).\n\nAlternatively, update manually: pip3 install --upgrade {__package__}\n\nChangelog: https://github.com/mdillondc/todo-txt-tui/commits/")
             bordered_layout = urwid.LineBox(text_widget, title="Update available")
             fill = urwid.Filler(bordered_layout, 'middle')
             overlay = urwid.Overlay(fill, keymap_instance.tasklist_decorations, 'center', 80, 'middle', 10)

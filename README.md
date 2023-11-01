@@ -126,7 +126,7 @@ You can modify the default theme by adding `palette.conf` in the appropriate loc
 ]
 ```
 
-Look to Urwid's [official documentation for supported colors](https://urwid.org/manual/displayattributes.html#standard-background-colors).
+[Supported colors](https://urwid.org/manual/displayattributes.html#standard-background-colors).
 
 ## Installation
 
