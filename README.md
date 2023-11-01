@@ -19,6 +19,7 @@ Skip to [Installation](#installation) (pip3).
 - **Markdown links**: Yes.
 - **Sync**: Changes made in todo.txt outside the application will be reflected in the app.
 - **Keyboard driven**: Navigate and manipulate everything from your keyboard with vim-inspired keys.
+- **Custom themes**: See [Configuration](#configuration).
 - Much more...
 
 ## Keybindings
@@ -48,7 +49,6 @@ Skip to [Installation](#installation) (pip3).
 (A) This task is most important
 (B) This task is moderately important
 (C) This task is less important
-... and so on
 ```
 
 ## Due Dates
@@ -99,6 +99,34 @@ And display like this:
 
 ![Reconstructed task](reconstructed-task.png)
 
+## Configuration
+
+### Theme
+
+You can modify the default theme by adding `palette.conf` in the appropriate location.
+
+* Linux: `~/.config/todo-txt-tui/palette.conf`
+* MacOS: `~/Library/Application Support/todo-txt-tui/palette.conf`
+
+```
+[
+    ["bold", "bold", ""],
+    ["default", "white", ""],
+    ["priority_a", "light red", ""],
+    ["priority_b", "brown", ""],
+    ["priority_c", "light green", ""],
+    ["priority_d", "light blue", ""],
+    ["priority_e", "dark magenta", ""],
+    ["context", "light magenta", ""],
+    ["project", "yellow", ""],
+    ["is_complete", "dark gray", ""],
+    ["is_danger", "light red", ""],
+    ["is_success", "light green", ""],
+    ["is_link", "light blue", ""]
+]
+```
+
+Look to Urwid's [official documentation for supported colors](https://urwid.org/manual/displayattributes.html#standard-background-colors).
 
 ## Installation
 

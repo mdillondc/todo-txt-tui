@@ -10,10 +10,14 @@ import asyncio
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
+def debug(text):
+    # return False
+    with open("debug.txt", "a") as debug_file:
+        debug_file.write(f"{text}\n")
+
 __version__ = '0.0.3'
 __package__ = 'todo-txt-tui'
 __sync_refresh_rate__ = 2
-
 
 # Notify user if there's an update available
 async def check_for_updates(keymap_instance):
@@ -58,6 +62,7 @@ async def check_for_updates(keymap_instance):
         pass  # If fetching the latest version, silently move on, effectively skipping the update check
 
 
+# Default theme
 PALETTE = [
     ('bold', 'bold', ''),
     ('default', 'white', ''),
@@ -71,8 +76,28 @@ PALETTE = [
     ('is_complete', 'dark gray', ''),
     ('is_danger', 'light red', ''),
     ('is_success', 'light green', ''),
-    ('is_link', 'light blue', '', 'underline'),
+    ('is_link', 'light blue', ''),
 ]
+
+# Check if user has defined a custom color palette
+os_name = platform.system()
+
+if os_name == 'Linux':
+    config_path = os.path.expanduser("~/.config/todo-txt-tui/palette.conf")
+elif os_name == 'Darwin':  # macOS
+    config_path = os.path.expanduser("~/Library/Application Support/todo-txt-tui/palette.conf")
+else:
+    config_path = None  # For unsupported OS
+
+if os.path.exists(config_path):
+    try:
+        with open(config_path, 'r') as f:
+            custom_palette = json.load(f)
+            if custom_palette:  # Making sure the file is not empty
+                PALETTE = custom_palette
+    except Exception as e:
+        # If error, the default PALETTE will be used
+        print(f"An error occurred while reading {config_path}. Falling back to default palette: {e}")
 
 COLORS = {
     '(A)': 'priority_a',
@@ -105,13 +130,6 @@ PRIORITY_REGEX = r'\(([A-Z])\)'
 DUE_DATE_REGEX = r'due:(\d{4}-\d{2}-\d{2})'
 RECURRENCE_REGEX = r'rec:([+]?[0-9]+[dwmy])'
 URLS_REGEX = r'(https?://[^\s\)]+|file://[^\s\)]+)'
-
-
-def debug(text):
-    return False
-    with open("debug.txt", "a") as debug_file:
-        debug_file.write(f"{text}\n")
-
 
 class CustomCheckBox(urwid.CheckBox):
     """
