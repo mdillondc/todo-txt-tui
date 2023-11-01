@@ -15,7 +15,7 @@ def debug(text):
     with open("debug.txt", "a") as debug_file:
         debug_file.write(f"{text}\n")
 
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 __package__ = 'todo-txt-tui'
 __sync_refresh_rate__ = 2
 
