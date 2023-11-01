@@ -6,25 +6,28 @@ import subprocess
 import platform
 import json
 import aiohttp
+import threading
 import asyncio
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
+
 
 def debug(text):
     # return False
     with open("debug.txt", "a") as debug_file:
         debug_file.write(f"{text}\n")
 
+
 __version__ = '0.0.5'
 __package__ = 'todo-txt-tui'
 __sync_refresh_rate__ = 2
+__check_for_updates_frequency__ = 1800  # 30 minutes in seconds
+
 
 # Notify user if there's an update available
-async def check_for_updates(keymap_instance):
-    try:
-        # Fetch the latest version
+def check_for_updates(loop, keymap_instance):
+    async def fetch():
         async with aiohttp.ClientSession() as session:
-            # async with session.get(f'https://test.pypi.org/pypi/{__package__}/json') as response:
             async with session.get(f'https://pypi.org/pypi/{__package__}/json') as response:
                 if response.status != 200:
                     return  # Exit if the response status is not 200 OK
@@ -34,15 +37,12 @@ async def check_for_updates(keymap_instance):
         if __version__ != latest_version:
             def keypress(key):
                 if key == 'enter':
+                    # Running multiple times because it's the only way I found to avoid installing from cache
                     subprocess.run(["pip3", "cache", "purge"])
                     subprocess.run(["pip3", "install", "--no-cache-dir", __package__])
-
-                    # Running this twice is the only I found to get around pip using local cache
                     subprocess.run(["pip3", "uninstall", "-y", __package__])
-                    # subprocess.run(["pip3", "install", "--no-cache-dir", "--index-url", "https://test.pypi.org/simple/", __package__])
                     subprocess.run(["pip3", "install", "--no-cache-dir", "--upgrade", __package__])
                     subprocess.run(["pip3", "uninstall", "-y", __package__])
-                    # subprocess.run(["pip3", "install", "--no-cache-dir", "--index-url", "https://test.pypi.org/simple/", __package__])
                     subprocess.run(["pip3", "install", "--no-cache-dir", "--upgrade", __package__])
 
                     os.system('clear')
@@ -58,8 +58,15 @@ async def check_for_updates(keymap_instance):
             overlay = urwid.Overlay(fill, keymap_instance.tasklist_decorations, 'center', 80, 'middle', 10)
             keymap_instance.main_frame.body = overlay
             keymap_instance.loop.unhandled_input = keypress
-    except Exception:
-        pass  # If fetching the latest version, silently move on, effectively skipping the update check
+
+    def thread_target():
+        asyncio.new_event_loop().run_until_complete(fetch())
+
+    # Start a new thread to perform the HTTP request
+    threading.Thread(target=thread_target).start()
+
+    # Reschedule the function to run again in 5 seconds
+    loop.set_alarm_in(__check_for_updates_frequency__, check_for_updates, keymap_instance)
 
 
 # Default theme
@@ -130,6 +137,7 @@ PRIORITY_REGEX = r'\(([A-Z])\)'
 DUE_DATE_REGEX = r'due:(\d{4}-\d{2}-\d{2})'
 RECURRENCE_REGEX = r'rec:([+]?[0-9]+[dwmy])'
 URLS_REGEX = r'(https?://[^\s\)]+|file://[^\s\)]+)'
+
 
 class CustomCheckBox(urwid.CheckBox):
     """
@@ -375,7 +383,8 @@ class Tasks:
 
                     # Extract old due date if present
                     due_date_match = re.search(DUE_DATE_REGEX, stripped_task)
-                    old_due_date = datetime.strptime(due_date_match.group(1), '%Y-%m-%d').date() if due_date_match else None
+                    old_due_date = datetime.strptime(due_date_match.group(1),
+                                                     '%Y-%m-%d').date() if due_date_match else None
 
                     # Calculate new due date based on recurrence
                     base_date = old_due_date if is_strict and old_due_date else completion_date
@@ -389,7 +398,8 @@ class Tasks:
                     new_due_date_str = new_due_date.strftime('%Y-%m-%d')
 
                     # Create new task with updated due date
-                    new_task = re.sub(DUE_DATE_REGEX, f'due:{new_due_date_str}', stripped_task) if old_due_date else stripped_task + f' due:{new_due_date_str}'
+                    new_task = re.sub(DUE_DATE_REGEX, f'due:{new_due_date_str}',
+                                      stripped_task) if old_due_date else stripped_task + f' due:{new_due_date_str}'
 
                     # Add the new task to recurring_tasks if it doesn't already exist
                     if not self.task_already_exists(new_task):
@@ -400,8 +410,6 @@ class Tasks:
         # Write the updated tasks back to the file
         with open(self.txt_file, 'w') as f:
             f.write('\n'.join(modified_tasks + recurring_tasks))
-
-
 
     # Archives completed tasks to a 'done.txt' file and removes them from the original file
     def archive(self):
@@ -1240,7 +1248,7 @@ class Search(urwid.Edit):
         super().keypress(size, key)
 
 
-async def main():
+def main():
     """
     Init. and run the actual application
     """
@@ -1306,7 +1314,7 @@ async def main():
     tasklist.loop.set_alarm_in(__sync_refresh_rate__, tasks.sync, (txt_file, tasklist, last_mod_time))
 
     # Notify user if a new version is available for install
-    await check_for_updates(tasklist)
+    tasklist.loop.set_alarm_in(0, check_for_updates, tasklist)
 
     # Start the MainLoop to display the application
     tasklist.loop.run()
@@ -1314,9 +1322,9 @@ async def main():
 
 # Start the application
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()
 
 
 # Needed to build for pypi because use of for main function await
 def entry_point():
-    asyncio.run(main())
+    main()
