@@ -4,7 +4,7 @@ A powerful, keyboard-driven Terminal User Interface ([TUI](https://en.wikipedia.
 
 Skip to [Installation](#installation) (pip3).
 
-![Screenshot](screenshot.png)
+![Screenshot](img/screenshot.png)
 
 ## Features
 
@@ -97,7 +97,7 @@ It will be reconstructed like this:
 
 And display like this:
 
-![Reconstructed task](reconstructed-task.png)
+![Reconstructed task](img/reconstructed-task.png)
 
 ## Configuration
 
@@ -136,6 +136,8 @@ pip3 install todo-txt-tui
 
 You will be notified if a new version is available.
 
+![Update notification](img/update-notification.png)
+
 ## Usage
 
 ```
@@ -143,6 +145,13 @@ todo-txt-tui /path/to/todo.txt
 ```
 
 On linux you can create an alias to speed things up. Example: `alias todo="todo-txt-tui /path/to/todo.txt"`. Then you can simply type `todo` in your terminal and the app will start and open your preferred todo.txt list.
+
+**Additional commands**
+
+```
+todo-txt-tui --version
+todo-txt-tui --help
+```
 
 ---
 
