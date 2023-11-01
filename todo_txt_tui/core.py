@@ -123,6 +123,19 @@ COLORS = {
     'is_complete': 'is_complete',
 }
 
+# ~/.config/todo-txt-tui/todo-txt-tui.conf
+SETTINGS = [
+    ('enableCompletionAndCreationDates', 'true'),
+    ('displayCompletionAndCreationDates', 'true'),
+    ('displayCompletedTasksByDefault', 'true'),
+]
+
+# Usage: `if setting_enabled('enableCompletionAndCreationDates'):`
+def setting_enabled(setting):
+    global SETTINGS
+    return any(item for item in SETTINGS if item[0] == setting and item[1].lower() == 'true')
+
+
 # For when we need to restore search results after refreshing the tasklist
 current_search_query = ''
 
