@@ -21,7 +21,11 @@ def debug(text):
 __version__ = '0.0.5'
 __package__ = 'todo-txt-tui'
 __sync_refresh_rate__ = 2
+__track_focused_task_interval__ = .1
 __check_for_updates_frequency__ = 1800  # 30 minutes in seconds
+__current_search_query__ = ''
+__focused_task_index__ = ''
+__focused_task_text__ = ''
 
 
 # Notify user if there's an update available
@@ -130,19 +134,12 @@ SETTINGS = [
     ('displayCompletedTasksByDefault', 'true'),
 ]
 
+
 # Usage: `if setting_enabled('enableCompletionAndCreationDates'):`
 def setting_enabled(setting):
     global SETTINGS
     return any(item for item in SETTINGS if item[0] == setting and item[1].lower() == 'true')
 
-
-# For when we need to restore search results after refreshing the tasklist
-current_search_query = ''
-
-# Because we have to focus on tasks when new ones are added or existing edited
-# And because we have NLP support, we should keep track of the last task added/edited
-# after nlp date conversion
-__latest_modified_task_text__ = None
 
 # Constants for regular expressions
 STRIP_X_FROM_TASK = r'^x\s'
@@ -240,15 +237,11 @@ class Tasks:
 
     # Adds a new task to the task file
     def add(self, new_task):
-        global __latest_modified_task_text__
-
         # Normalize the new task to remove extra spaces
         normalized_task = self.normalize_task(new_task)
 
         # Convert NLP dates to actual dates
         normalized_task = self.convert_nlp_to_dates(normalized_task)
-
-        __latest_modified_task_text__ = normalized_task
 
         # Check if the file is empty
         file_is_empty = False
@@ -265,15 +258,12 @@ class Tasks:
 
     # Edits an existing task in the task file
     def edit(self, old_task, new_task):
-        global __latest_modified_task_text__  # Global variable to hold the latest modified task
-
         # Normalize both the old and new tasks
         normalized_old_task = self.normalize_task(old_task)
         normalized_new_task = self.normalize_task(new_task)
 
         # Convert NLP dates to actual dates
         normalized_new_task = self.convert_nlp_to_dates(normalized_new_task)
-        __latest_modified_task_text__ = normalized_new_task
 
         # Read all tasks from the file
         with open(self.txt_file, 'r') as f:
@@ -289,10 +279,9 @@ class Tasks:
         with open(self.txt_file, 'w') as f:
             f.writelines(tasks)
 
-    # Deletes a task from the task file
-    def delete(self, task_text_to_delete):
+    def delete(self, task_text):
         # Normalize the task text for consistency
-        normalized_task = self.normalize_task(task_text_to_delete)
+        normalized_task = self.normalize_task(task_text)
 
         # Read all tasks from the file
         with open(self.txt_file, 'r') as f:
@@ -307,8 +296,6 @@ class Tasks:
 
     # Postpone task to tomorrow
     def postpone_to_tomorrow(self, task_text):
-        global __latest_modified_task_text__
-
         # Search for the due date in task_text
         due_date_match = re.search(DUE_DATE_REGEX, task_text)
         if not due_date_match:
@@ -345,8 +332,6 @@ class Tasks:
         with open(self.txt_file, 'w') as f:
             f.writelines(tasks)
 
-        __latest_modified_task_text__ = updated_task
-
     # Toggle the completion status of a task (and add a new task if rec rule is present)
     def complete(self, task_text):
         # Read the current tasks from the file
@@ -368,7 +353,7 @@ class Tasks:
             stripped_task = task.strip()
 
             # Remove the 'x ' prefix for completed tasks
-            modified_task_text = re.sub(r'^x\s', '', stripped_task)
+            modified_task_text = stripped_task  # re.sub(r'^x\s', '', stripped_task)
 
             # Check if the task is originally completed
             originally_completed = stripped_task.startswith('x ')
@@ -520,8 +505,8 @@ class Tasks:
     # Performs a fuzzy search for tasks and updates the UI to display only matching tasks
     @staticmethod
     def search(edit_widget, search_query, txt_file, tasklist_instance):
-        global current_search_query  # Use the global variable
-        current_search_query = search_query  # Update the current search query
+        global __current_search_query__  # Use the global variable
+        __current_search_query__ = search_query  # Update the current search query
 
         # Create a Tasks instance for the given file path
         tasks = Tasks(txt_file)
@@ -610,6 +595,7 @@ class Tasks:
 
     # Checks for updates in the task file and refreshes the UI if needed
     def sync(self, loop, user_data):
+        global __focused_task_index__
         # Unpack user data to get file path, UI instance, and last modification time
         txt_file, tasklist_instance, last_mod_time = user_data
 
@@ -638,7 +624,7 @@ class Tasks:
 
             # Refocus on the previously focused task in the UI based on its original text
             if focused_task_text:
-                tasklist_instance.focus_specific_task(focused_task_text)
+                tasklist_instance.focus_on_specific_task(__focused_task_index__)
 
             # Update the last known modification time
             last_mod_time[0] = current_mod_time
@@ -680,7 +666,7 @@ class TaskUI:
         for task in tasks:
 
             # Skip tasks that don't match the current search query
-            if current_search_query and current_search_query.lower() not in task['text'].lower():
+            if __current_search_query__ and __current_search_query__.lower() not in task['text'].lower():
                 continue
 
             # Extract the due date from the current task
@@ -775,7 +761,11 @@ class TaskUI:
             colored_task_text = colored_task_text[:-1]
 
             # Create a custom checkbox for the task and apply the color scheme
-            checkbox = CustomCheckBox(colored_task_text, state=task['completed'], original_text=task['text'].strip())
+            # Create a custom checkbox for the task and apply the color scheme
+            original_text_with_x = 'x ' + task['text'].strip() if task['completed'] else task['text'].strip()
+            checkbox = CustomCheckBox(colored_task_text, state=task['completed'], original_text=original_text_with_x)
+            # checkbox = CustomCheckBox(colored_task_text, state=task['completed'], original_text=task['text'].strip())
+
             wrapped_checkbox = urwid.AttrMap(checkbox, None, focus_map='bold')
 
             # Add the checkbox to the list of widgets
@@ -802,22 +792,20 @@ class TaskUI:
 
         # Function to handle the entered text
         def on_ask(text):
-            global __latest_modified_task_text__
-            __latest_modified_task_text__ = text
-
             if not text.strip():  # Exit if text is empty
                 return
 
             if default_text:  # Edit existing task
                 tasks.edit(default_text, text)
+                # Refresh UI and focus on modified/added task
+                keymap_instance.refresh_displayed_tasks()
+                keymap_instance.focus_on_specific_task(__focused_task_index__)
             else:  # Add a new task
                 task_exists = tasks.task_already_exists(text)
                 if not task_exists:
                     tasks.add(text)
-
-            # Refresh UI and focus on modified/added task
-            keymap_instance.refresh_displayed_tasks()
-            keymap_instance.focus_specific_task(__latest_modified_task_text__)
+                    keymap_instance.refresh_displayed_tasks()
+                    keymap_instance.focus_on_specific_task(text)
 
         # Initialize urwid Edit widget
         ask = urwid.Edit()
@@ -1015,74 +1003,59 @@ class Body(urwid.ListBox):
         # Update the main frame body to reflect the new task list
         self.main_frame.body = self.tasklist_decorations
 
-    def focus_specific_task(self, task_text=None):
+    def focus_on_specific_task(self, task=None):
+        """
+        Set focus on specific task either based on its index or text content
+        """
         # Check if the ListBox is empty
         if len(self.body) == 0:
             return  # Do nothing if the ListBox is empty
 
-        if task_text is None:
-            # Focus on the topmost task
-            self.set_focus(1)
-            return
-
-        # Sets the focus back to a specific task based on its normalized text
-        # Iterate over all widgets in the ListBox body
-        for i, widget in enumerate(self.body):
-            # Check if the widget is a CustomCheckBox
-            if hasattr(widget, 'original_widget') and isinstance(widget.original_widget, CustomCheckBox):
-                # Get the original task text from the custom checkbox
-                original_task_text = widget.original_widget.original_text
-
-                # If the original task text matches the task text, set the focus
-                if original_task_text == task_text:
-                    self.set_focus(i)
-                    return
-
-    # Keep it DRY in keybindings
-    def archive(self):
-        focused_widget, focused_position = self.get_focus()
-        focused_task_text_display = focused_widget.original_widget.get_label().strip() if hasattr(focused_widget,
-                                                                                                  'original_widget') else None
-        focused_task_text = focused_widget.original_widget.original_text
-
-        tasks = Tasks(self.txt_file)
-        tasks.archive()
-
-        # Don't try to set focus if tasks file is empty (we can't set focus if there are no more tasks)
-        if os.path.isfile(self.txt_file) and os.path.getsize(self.txt_file) != 0:
-            self.body = urwid.SimpleFocusListWalker(
-                TaskUI.render_and_display_tasks(tasks.sort(tasks.read()), PALETTE).widget_list)
-            self.main_frame.body = self.tasklist_decorations
-
-            # Find the closest task that is adjacent to the one that had focus before archiving
-            new_focused_position = None
-            for i, widget in enumerate(self.body):
-                if hasattr(widget, 'original_widget') and isinstance(widget.original_widget, CustomCheckBox):
-                    task_text_display = widget.original_widget.get_label().strip()
-                    task_text = widget.original_widget.original_text
-                    if task_text == focused_task_text:
-                        new_focused_position = i
-                        break
-                else:
-                    # Handle other widget types here if needed
+        if task is not None:
+            if isinstance(task, int):  # If task is an integer, treat it as an index
+                try:
+                    # Try setting focus to the task at the given index
+                    self.set_focus(task)
+                except IndexError:
+                    # If the index is out of range, do nothing or handle it differently
                     pass
+            elif isinstance(task, str):  # If task is a string, treat it as the task text
+                for i, widget in enumerate(self.body):
+                    if hasattr(widget, 'original_widget') and \
+                            isinstance(widget.original_widget, CustomCheckBox) and \
+                            widget.original_widget.original_text == task:
+                        self.set_focus(i)
+                        break
+        else:
+            # Focus on the topmost task if no task is specified
+            self.set_focus(1)
 
-            if new_focused_position is None:
-                new_focused_position = min(focused_position, len(self.body) - 1)
+    def track_focused_task(self, loop, user_data):
+        """
+        Constantly updates the __focused_task_index/text__ global so we know which task is
+        in focus at all times for easier task interaction throughout
+        """
 
-            self.set_focus(new_focused_position)
+        focused_widget, focused_position = self.get_focus()
+        global __focused_task_index__  # Ensure you're updating the global variable
+        __focused_task_index__ = focused_position
 
-    # Keep it DRY in keybindings
-    def complete(self):
-        focused_widget, _ = self.get_focus()
+        # Check if the focused widget is a CustomCheckBox
         if hasattr(focused_widget, 'original_widget') and isinstance(focused_widget.original_widget, CustomCheckBox):
-            task_text = focused_widget.original_widget.original_text  # Get original text from CustomCheckBox
-            tasks = Tasks(self.txt_file)
-            tasks.complete(task_text)
-            self.refresh_displayed_tasks()
-            self.focus_specific_task(task_text)
+            original_text = focused_widget.original_widget.original_text
+        else:
+            original_text = "Not a CustomCheckBox"
+
+        global __focused_task_text__
+        __focused_task_text__ = original_text
+
+        loop.set_alarm_in(__track_focused_task_interval__,
+                          self.track_focused_task)  # Schedule the next update in 1 second
 
     def keypress(self, size, key):
+        global __focused_task_index__
+        global __focused_task_text__
+
         # Determine the OS type for URL opening
         os_type = platform.system()
         # Get the current time for detecting rapid keypresses
@@ -1111,7 +1084,7 @@ class Body(urwid.ListBox):
 
         # Move focus down
         elif key == 'j':
-            return super(Body, self).keypress(size, 'down')
+            super(Body, self).keypress(size, 'down')
 
         # Move focus up
         elif key == 'k':
@@ -1129,28 +1102,19 @@ class Body(urwid.ListBox):
                 task_text = focused_widget.original_widget.original_text  # Get original text from CustomCheckBox
                 dialog = TaskUI.open_task_add_edit_dialog(self, "Edit Task", task_text)
                 if dialog is not None:
-                    new_task = dialog.edit_text
-                    # tasks.edit(task_text, new_task)
                     self.update_tasks()
 
         # Archive completed tasks and refresh display
         elif key == 'A':
-            self.archive()
+            self.tasks.archive()
+            self.refresh_displayed_tasks()
+            self.focus_on_specific_task(__focused_task_index__)
 
         # Delete the currently focused task
         elif key == 'D':
-            focused_widget, focused_position = self.get_focus()
-            if hasattr(focused_widget, 'original_widget') and isinstance(focused_widget.original_widget,
-                                                                         CustomCheckBox):
-                task_text = focused_widget.original_widget.original_text  # Get original text from CustomCheckBox
-                tasks = Tasks(self.txt_file)
-                tasks.delete(task_text)
-                self.refresh_displayed_tasks()
-
-                # Check if the list is empty before attempting to set focus
-                if len(self.body) > 0:
-                    new_focus_position = min(focused_position, len(self.body) - 1)
-                    self.set_focus(new_focus_position)
+            self.tasks.delete(__focused_task_text__)
+            self.refresh_displayed_tasks()
+            self.focus_on_specific_task(__focused_task_index__)
 
         # Postpone the currently focused task to tomorrow
         elif key == 'P':
@@ -1159,7 +1123,7 @@ class Body(urwid.ListBox):
                 task_text = focused_widget.original_widget.original_text
                 task_text = Tasks.postpone_to_tomorrow(self, task_text)
                 self.refresh_displayed_tasks()
-                self.focus_specific_task(__latest_modified_task_text__)
+                self.focus_on_specific_task(__focused_task_index__)
 
         # Set focus to the search bar
         elif key == 'f':
@@ -1173,13 +1137,17 @@ class Body(urwid.ListBox):
             self.tasklist_instance.set_focus(1)
 
         # Toggle task completion for the currently focused task
-        elif key in ['x']:
-            self.complete()
+        elif key == 'x':
+            self.tasks.complete(__focused_task_text__)
+            self.refresh_displayed_tasks()
+            self.focus_on_specific_task(__focused_task_index__)
 
         # Toggle task completion and archive all completed tasks at the same time
         elif key == 'X':
-            self.complete()
-            self.archive()
+            self.tasks.complete(__focused_task_text__)
+            self.tasks.archive()
+            self.refresh_displayed_tasks()
+            self.focus_on_specific_task(__focused_task_index__)
 
         # Open the URLs of the currently focused task
         elif key == 'u':
@@ -1325,6 +1293,9 @@ def main():
 
     # Set an alarm to check for file changes every 5 seconds
     tasklist.loop.set_alarm_in(__sync_refresh_rate__, tasks.sync, (txt_file, tasklist, last_mod_time))
+
+    # Set an alarm to update focused task index every 1 second
+    tasklist.loop.set_alarm_in(__track_focused_task_interval__, tasklist.track_focused_task)
 
     # Notify user if a new version is available for install
     tasklist.loop.set_alarm_in(0, check_for_updates, tasklist)
