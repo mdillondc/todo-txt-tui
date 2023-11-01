@@ -15,7 +15,7 @@ def debug(text):
     with open("debug.txt", "a") as debug_file:
         debug_file.write(f"{text}\n")
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 __package__ = 'todo-txt-tui'
 __sync_refresh_rate__ = 2
 
@@ -52,7 +52,7 @@ async def check_for_updates(keymap_instance):
                     keymap_instance.main_frame.body = keymap_instance.tasklist_decorations
 
             text_widget = urwid.Text(
-                f"A new version ({latest_version}) is available. Press ENTER to install.\n\nAlternatively, update manually: pip3 install --upgrade -i {__package__}\n\nPress ESC to dismiss.")
+                f"A new version ({latest_version}) is available. Press ENTER to install (ESC to dismiss).\n\nAlternatively, update manually: pip3 install --upgrade -i {__package__}\n\nChangelog: https://github.com/mdillondc/todo-txt-tui/commits/")
             bordered_layout = urwid.LineBox(text_widget, title="Update available")
             fill = urwid.Filler(bordered_layout, 'middle')
             overlay = urwid.Overlay(fill, keymap_instance.tasklist_decorations, 'center', 80, 'middle', 10)
