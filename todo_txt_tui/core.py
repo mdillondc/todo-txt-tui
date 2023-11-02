@@ -29,7 +29,7 @@ def is_valid_date(string):
 __version__ = '0.0.6'
 __package__ = 'todo-txt-tui'
 __sync_refresh_rate__ = 2
-__track_focused_task_interval__ = .1
+__track_focused_task_interval__ = 1
 __check_for_updates_frequency__ = 1800  # 30 minutes in seconds
 __current_search_query__ = ''
 __focused_task_index__ = ''
@@ -280,7 +280,7 @@ class Tasks:
         return task_text in existing_tasks
 
     # Adds a new task to the task file
-    def add(self, new_task):
+    def add(self, keymap_instance, new_task):
         # Normalize the new task to remove extra spaces
         normalized_task = self.normalize_task(new_task)
 
@@ -299,6 +299,9 @@ class Tasks:
             if not file_is_empty:
                 f.write('\n')
             f.write(normalized_task)
+
+        keymap_instance.refresh_displayed_tasks()
+        keymap_instance.focus_on_specific_task(normalized_task)
 
     # Edits an existing task in the task file
     def edit(self, old_task, new_task):
@@ -867,19 +870,14 @@ class TaskUI:
 
             if default_text:  # Edit existing task
                 tasks.edit(default_text, text)
-                # Refresh UI and focus on modified/added task
                 keymap_instance.refresh_displayed_tasks()
                 keymap_instance.focus_on_specific_task(__focused_task_index__)
             else:  # Add a new task
                 if setting_enabled('enableCompletionAndCreationDates'):
                     text = datetime.now().strftime('%Y-%m-%d') + ' ' + text
                 task_exists = tasks.task_already_exists(text)
-                keymap_instance.refresh_displayed_tasks()
-                keymap_instance.focus_on_specific_task(text)
                 if not task_exists:
-                    tasks.add(text)
-                    keymap_instance.refresh_displayed_tasks()
-                    keymap_instance.focus_on_specific_task(text)
+                    tasks.add(keymap_instance, text)
 
         # Initialize urwid Edit widget
         ask = urwid.Edit()
@@ -1122,6 +1120,7 @@ class Body(urwid.ListBox):
 
         global __focused_task_text__
         __focused_task_text__ = original_text
+        debug(f"__focused_task_text__: {__focused_task_text__}")
 
         loop.set_alarm_in(__track_focused_task_interval__,
                           self.track_focused_task)  # Schedule the next update in 1 second
