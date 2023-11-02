@@ -6,3 +6,4 @@ dist/
 *.egg-info/
 *.txt
 core-dev.py
+core-experimental.py
