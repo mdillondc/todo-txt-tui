@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel"]
 
 [project]
 name = 'todo-txt-tui'
-version = '0.0.6'
+version = '0.0.7'
 description = 'A powerful, keyboard-driven terminal application for managing todo.txt files.'
 readme = "README.md"
 authors = [{name = 'mdillondc'}]
