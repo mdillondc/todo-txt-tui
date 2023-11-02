@@ -456,7 +456,6 @@ class Tasks:
 
                     # Remove old creation date if present
                     if is_valid_date(new_task[0:10]):
-                        debug(f"old creation date: {new_task[0:10]}")
                         new_task = new_task[11:]  # strip creation date from new task text
 
                     # Add new creation date if setting is enabled
@@ -1120,7 +1119,6 @@ class Body(urwid.ListBox):
 
         global __focused_task_text__
         __focused_task_text__ = original_text
-        debug(f"__focused_task_text__: {__focused_task_text__}")
 
         loop.set_alarm_in(__track_focused_task_interval__,
                           self.track_focused_task)  # Schedule the next update in 1 second
