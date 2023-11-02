@@ -29,7 +29,7 @@ def is_valid_date(string):
 __version__ = '0.0.7'
 __package__ = 'todo-txt-tui'
 __sync_refresh_rate__ = 2
-__track_focused_task_interval__ = 1
+__track_focused_task_interval__ = .1
 __check_for_updates_frequency__ = 1800  # 30 minutes in seconds
 __current_search_query__ = ''
 __focused_task_index__ = ''
