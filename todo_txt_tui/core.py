@@ -376,6 +376,8 @@ class Tasks:
         with open(self.txt_file, 'w') as f:
             f.writelines(tasks)
 
+        return updated_task
+
     # Toggle the completion status of a task (and add a new task if rec rule is present)
     def complete(self, task_text):
         # Read the current tasks from the file
@@ -1195,7 +1197,7 @@ class Body(urwid.ListBox):
                 task_text = focused_widget.original_widget.original_text
                 task_text = Tasks.postpone_to_tomorrow(self, task_text)
                 self.refresh_displayed_tasks()
-                self.focus_on_specific_task(__focused_task_index__)
+                self.focus_on_specific_task(task_text)
 
         # Set focus to the search bar
         elif key == 'f':
