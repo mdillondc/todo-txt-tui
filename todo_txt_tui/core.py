@@ -505,15 +505,22 @@ class Tasks:
         """
 
         # Store task components
+        task_text_dates = []  # completion/creation date
         task_text = []
         projects = []
         contexts = []
+        priority = ""
         due_date = ""
         rec_rule = ""
+        complete = False
 
         words = task.split()
-        for word in words:
-            if word.startswith('+'):
+
+        for index, word in enumerate(words):
+            if index == 0 and word == 'x':
+                complete = True
+                continue
+            elif word.startswith('+'):
                 projects.append(word)
             elif word.startswith('@'):
                 contexts.append(word)
@@ -521,15 +528,25 @@ class Tasks:
                 due_date = word
             elif word.startswith('rec:'):
                 rec_rule = word
+            elif is_valid_date(word.strip()):
+                task_text_dates.append(word)
+            elif re.match(r'^\([A-Z]\)', word):
+                priority = word
             else:
                 task_text.append(word)
 
         # Sort projects and contexts
-        projects = sorted(projects, key=str.casefold)
-        contexts = sorted(contexts, key=str.casefold)
+        projects.sort(key=str.casefold)
+        contexts.sort(key=str.casefold)
 
-        # Reconstruct the task
-        restructured_task = " ".join(task_text)
+        # Construct the task in the correct order
+        restructured_task = ' '.join(task_text_dates)  # Add dates
+        if priority:
+            restructured_task += ' ' + priority if restructured_task else priority  # Add priority if present
+
+        restructured_task += ' ' + ' '.join(task_text) if restructured_task else ' '.join(task_text)
+        # Add the main task text, ensuring not to add an extra space at the start
+
         if projects:
             restructured_task += " " + " ".join(projects)
         if contexts:
@@ -538,6 +555,10 @@ class Tasks:
             restructured_task += " " + due_date
         if rec_rule:
             restructured_task += " " + rec_rule
+
+        # If the task is complete, prepend 'x' to the task
+        if complete:
+            restructured_task = 'x ' + restructured_task
 
         return restructured_task
 
