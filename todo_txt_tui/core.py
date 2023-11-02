@@ -16,6 +16,7 @@ def debug(text):
     with open("debug.txt", "a") as debug_file:
         debug_file.write(f"{text}\n")
 
+
 # Helper
 def is_valid_date(string):
     try:
@@ -24,7 +25,8 @@ def is_valid_date(string):
     except ValueError:
         return False
 
-__version__ = '0.0.5'
+
+__version__ = '0.0.6'
 __package__ = 'todo-txt-tui'
 __sync_refresh_rate__ = 2
 __track_focused_task_interval__ = .1
@@ -140,7 +142,7 @@ COLORS = {
 # ~/.config/todo-txt-tui/settings.conf
 SETTINGS = [
     ('enableCompletionAndCreationDates', 'true'),
-    ('hideCompletionAndCreationDates', 'false'),
+    ('hideCompletionAndCreationDates', 'true'),
 ]
 
 if os.path.exists(settings_path):
@@ -450,7 +452,7 @@ class Tasks:
                     # Remove old creation date if present
                     if is_valid_date(new_task[0:10]):
                         debug(f"old creation date: {new_task[0:10]}")
-                        new_task = new_task[11:] # strip creation date from new task text
+                        new_task = new_task[11:]  # strip creation date from new task text
 
                     # Add new creation date if setting is enabled
                     if setting_enabled('enableCompletionAndCreationDates'):
