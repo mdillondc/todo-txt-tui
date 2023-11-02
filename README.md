@@ -1,8 +1,8 @@
 # TodoTxtTUI
 
-A powerful, keyboard-driven terminal application for managing your **todo.txt** file.
+A powerful, keyboard-driven terminal application for managing todo.txt files.
 
-Platform support: Linux and macOS. In theory, it should work on Windows, but I currently have no plans on testing this.
+Supports Linux and macOS. In theory, it should work on Windows, but I currently have no plans on testing this.
 
 Jump to [Installation](#installation).
 
@@ -143,7 +143,7 @@ And display like this:
 ]
 ```
 
-See [supported colors](https://urwid.org/manual/displayattributes.html#standard-background-colors). Please note that not all terminals support all colors. I recommend [Alacritty](https://github.com/alacritty/alacritty).
+See [supported colors](https://urwid.org/manual/displayattributes.html#standard-background-colors).
 
 ## Installation
 
@@ -163,7 +163,7 @@ You will be notified if a new version is available.
 todo-txt-tui /path/to/todo.txt
 ```
 
-On linux you can create an alias to speed things up. Example: `alias todo="todo-txt-tui /path/to/todo.txt"`. Then you can simply type `todo` in your terminal and the app will start and open your preferred todo.txt list.
+Tip! Create an alias to speed things up. Example: `alias todo="todo-txt-tui /path/to/todo.txt"`. Then you can simply type `todo` in your terminal and the app will start and open your preferred todo.txt list.
 
 **Additional commands**
 
