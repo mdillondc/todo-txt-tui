@@ -13,5 +13,8 @@ dependencies = [
     "aiohttp"
 ]
 
+[tool.setuptools]
+packages = ["todo_txt_tui"]
+
 [project.scripts]
 todo-txt-tui = "todo_txt_tui.core:entry_point"
