@@ -1,8 +1,10 @@
 # TodoTxtTUI
 
-A powerful, keyboard-driven Terminal User Interface ([TUI](https://en.wikipedia.org/wiki/Text-based_user_interface)) for managing your **todo.txt** file.
+A powerful, keyboard-driven terminal application for managing your **todo.txt** file.
 
-Skip to [Installation](#installation) (pip3).
+Platform support: Linux and macOS. In theory, it should work on Windows, but I currently have no plans on testing this.
+
+Jump to [Installation](#installation).
 
 ![Screenshot](img/screenshot.png)
 
@@ -104,10 +106,10 @@ And display like this:
 
 ### Settings
 
-Default settings follow.
-
 * Linux: `~/.config/todo-txt-tui/settings.conf`
-* MacOS: `~/Library/Application Support/todo-txt-tui/settings.conf`
+* macOS: `~/Library/Application Support/todo-txt-tui/settings.conf`
+
+**Default settings**
 
 ```
 [
@@ -118,10 +120,10 @@ Default settings follow.
 
 ### Theme
 
-You can modify the default theme by adding `palette.conf` in the appropriate location.
-
 * Linux: `~/.config/todo-txt-tui/palette.conf`
-* MacOS: `~/Library/Application Support/todo-txt-tui/palette.conf`
+* macOS: `~/Library/Application Support/todo-txt-tui/palette.conf`
+
+**Default palette**
 
 ```
 [
@@ -141,9 +143,11 @@ You can modify the default theme by adding `palette.conf` in the appropriate loc
 ]
 ```
 
-[Supported colors](https://urwid.org/manual/displayattributes.html#standard-background-colors).
+See [supported colors](https://urwid.org/manual/displayattributes.html#standard-background-colors). Please note that not all terminals support all colors. I recommend [Alacritty](https://github.com/alacritty/alacritty).
 
 ## Installation
+
+Make sure you have Python installed.
 
 ```
 pip3 install todo-txt-tui
@@ -171,4 +175,4 @@ todo-txt-tui --help
 ---
 
 **Original idea**  
-Read more about todo.txt at [todotxt.org](http://todotxt.org/). Gina Trapani originally came up with the idea. It has since been extended, e.g. with recurring tasks and other features.
+Read more at [todotxt.org](http://todotxt.org/). Gina Trapani originally came up with the idea. It has since been extended, e.g. with recurring tasks and other features.
