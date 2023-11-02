@@ -16,6 +16,7 @@ Skip to [Installation](#installation) (pip3).
 - **Projects/Contexts**: With autosuggestions and autocompletion.
 - **Archiving**: Completed tasks can be moved to a `done.txt`.
 - **Search**: Quickly find the tasks you're looking for.
+- **Creation/Completion dates**: Enable or disable them. See [Configuration](#configuration).
 - **Markdown links**: Yes.
 - **Sync**: Changes made in todo.txt outside the application will be reflected in the app.
 - **Keyboard driven**: Navigate and manipulate everything from your keyboard with vim-inspired keys.
@@ -100,6 +101,20 @@ And display like this:
 ![Reconstructed task](img/reconstructed-task.png)
 
 ## Configuration
+
+### Settings
+
+Default settings follow.
+
+* Linux: `~/.config/todo-txt-tui/settings.conf`
+* MacOS: `~/Library/Application Support/todo-txt-tui/settings.conf`
+
+```
+[
+    ["enableCompletionAndCreationDates", "true"],
+    ["hideCompletionAndCreationDates", "true"]
+]
+```
 
 ### Theme
 

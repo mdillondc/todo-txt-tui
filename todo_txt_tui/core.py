@@ -13,10 +13,16 @@ from dateutil.relativedelta import relativedelta
 
 
 def debug(text):
-    # return False
     with open("debug.txt", "a") as debug_file:
         debug_file.write(f"{text}\n")
 
+# Helper
+def is_valid_date(string):
+    try:
+        datetime.strptime(string, '%Y-%m-%d')
+        return True
+    except ValueError:
+        return False
 
 __version__ = '0.0.5'
 __package__ = 'todo-txt-tui'
@@ -94,21 +100,24 @@ PALETTE = [
 os_name = platform.system()
 
 if os_name == 'Linux':
-    config_path = os.path.expanduser("~/.config/todo-txt-tui/palette.conf")
+    palette_path = os.path.expanduser("~/.config/todo-txt-tui/palette.conf")
+    settings_path = os.path.expanduser("~/.config/todo-txt-tui/settings.conf")
 elif os_name == 'Darwin':  # macOS
-    config_path = os.path.expanduser("~/Library/Application Support/todo-txt-tui/palette.conf")
+    palette_path = os.path.expanduser("~/Library/Application Support/todo-txt-tui/palette.conf")
+    settings_path = os.path.expanduser("~/Library/Application Support/todo-txt-tui/settings.conf")
 else:
-    config_path = None  # For unsupported OS
+    palette_path = None  # For unsupported OS
+    settings_path = None
 
-if os.path.exists(config_path):
+if os.path.exists(palette_path):
     try:
-        with open(config_path, 'r') as f:
+        with open(palette_path, 'r') as f:
             custom_palette = json.load(f)
             if custom_palette:  # Making sure the file is not empty
                 PALETTE = custom_palette
     except Exception as e:
         # If error, the default PALETTE will be used
-        print(f"An error occurred while reading {config_path}. Falling back to default palette: {e}")
+        print(f"An error occurred while reading {palette_path}. Falling back to default palette: {e}")
 
 COLORS = {
     '(A)': 'priority_a',
@@ -127,12 +136,22 @@ COLORS = {
     'is_complete': 'is_complete',
 }
 
-# ~/.config/todo-txt-tui/todo-txt-tui.conf
+# Default settings
+# ~/.config/todo-txt-tui/settings.conf
 SETTINGS = [
     ('enableCompletionAndCreationDates', 'true'),
-    ('displayCompletionAndCreationDates', 'true'),
-    ('displayCompletedTasksByDefault', 'true'),
+    ('hideCompletionAndCreationDates', 'false'),
 ]
+
+if os.path.exists(settings_path):
+    try:
+        with open(settings_path, 'r') as f:
+            custom_settings = json.load(f)
+            if custom_settings:  # Making sure the file is not empty
+                SETTINGS = custom_settings
+    except Exception as e:
+        # If error, the default PALETTE will be used
+        print(f"An error occurred while reading {settings_path}. Falling back to default settings: {e}")
 
 
 # Usage: `if setting_enabled('enableCompletionAndCreationDates'):`
@@ -200,35 +219,58 @@ class Tasks:
     def sort(tasks):
         def parse(task_text):
             # Using regular expressions to search for priority, due date, and recurrence in the task line
-            priority = re.search(PRIORITY_REGEX, task_text)
-            due_date = re.search(DUE_DATE_REGEX, task_text)
+            priority_match = re.search(PRIORITY_REGEX, task_text)
+            due_date_match = re.search(DUE_DATE_REGEX, task_text)
             completed = task_text.startswith('x ')
-            recurrence = re.search(RECURRENCE_REGEX, task_text)
+            recurrence_match = re.search(RECURRENCE_REGEX, task_text)
+
+            # If the task is completed, remove 'x ' from the beginning
+            # This is handled later in `def complete`
+            if completed:
+                task_text = task_text[2:]
 
             # Create and return a dictionary containing the parsed attributes for each task
             return {
                 'text': task_text,
-                'priority': priority.group(1) if priority else None,
-                'due_date': due_date.group(1) if due_date else None,
+                'priority': priority_match.group(1) if priority_match else None,
+                'due_date': due_date_match.group(1) if due_date_match else None,
                 'completed': completed,
-                'recurrence': recurrence.group(1) if recurrence else None,
+                'recurrence': recurrence_match.group(1) if recurrence_match else None,
             }
 
-        # Parse each task line into a dictionary of its components
-        tasks = [parse(task) for task in tasks]
+        def get_sort_key(task):
+            # Ignore completion/creation dates for sorting
+            sort_text = task['text']
+            if task['completed']:
+                # Skip 'x ' and the first (completion) date
+                if is_valid_date(sort_text[:10]):
+                    # Remove the first date and the trailing space
+                    sort_text = sort_text[11:]
+                    if is_valid_date(sort_text[:10]):
+                        # Remove the second (creation) date and the trailing space
+                        sort_text = sort_text[11:]
+            else:
+                if is_valid_date(sort_text[:10]):
+                    # Skip the date and a space
+                    sort_text = sort_text[11:]
 
-        # Remove the 'x ' prefix from completed tasks for sorting purposes
-        for task in tasks:
-            task['text'] = re.sub(STRIP_X_FROM_TASK, '', task['text'])
+            # Extract priority for sorting
+            priority = task['priority'] if task['priority'] is not None else 'Z'
+
+            # Construct the sorting key
+            return (
+                task['due_date'] if task['due_date'] is not None else '9999-99-99',
+                priority,  # Sort by priority next
+                sort_text.strip().lower()  # Then by the task text without dates
+            )
+
+        # Parse each task line into a dictionary of its components
+        parsed_tasks = [parse(task) for task in tasks]
 
         # Sort tasks first by due date, then by priority, and lastly by text
-        tasks.sort(key=lambda x: (
-            x['due_date'] if x['due_date'] is not None else '9999-99-99',
-            ord(x['priority']) if x['priority'] is not None else ord('Z') + 1,
-            x['text'].strip().lower()
-        ))
+        parsed_tasks.sort(key=get_sort_key)
 
-        return tasks
+        return parsed_tasks
 
     # Do not allow adding duplicate tasks
     def task_already_exists(self, task_text):
@@ -347,40 +389,46 @@ class Tasks:
         # Current date of completion (today's date)
         completion_date = datetime.now().date()
 
-        # Loop through each task
         for i, task in enumerate(tasks):
             # Remove leading and trailing whitespaces
-            stripped_task = task.strip()
+            text = task.strip()
 
-            # Remove the 'x ' prefix for completed tasks
-            modified_task_text = stripped_task  # re.sub(r'^x\s', '', stripped_task)
-
-            # Check if the task is originally completed
-            originally_completed = stripped_task.startswith('x ')
+            # Check if the task is already complete
+            is_complete = text.startswith('x ')
 
             # Check if the modified task text matches the provided task_text
-            if modified_task_text == task_text and not task_toggled:
+            if text == task_text and not task_toggled:
                 # Set the flag to True
                 task_toggled = True
 
                 # Toggle the task's completed state
-                if originally_completed:
-                    modified_task = stripped_task[2:]
+                if is_complete:
+                    if setting_enabled('enableCompletionAndCreationDates'):
+                        # Check if what follows "x " is a date
+                        if len(text) >= 15 and is_valid_date(text[2:12]):
+                            # If there's a date, slice off "x " and the date with the trailing space
+                            modified_task = text[13:]
+                        else:
+                            # If there's no date, just slice off "x " which is the first 2 characters
+                            modified_task = text[2:]
                 else:
-                    modified_task = 'x ' + stripped_task
+                    if setting_enabled('enableCompletionAndCreationDates'):
+                        modified_task = 'x ' + datetime.now().strftime('%Y-%m-%d') + ' ' + text
+                    else:
+                        modified_task = 'x ' + text
 
                 modified_tasks.append(modified_task)
 
                 # Handle recurring tasks
-                if "rec:" in stripped_task and not originally_completed:
+                if "rec:" in text and not is_complete:
                     # Extract recurrence value
-                    recurrence_value = re.search(RECURRENCE_REGEX, stripped_task).group(1)
+                    recurrence_value = re.search(RECURRENCE_REGEX, text).group(1)
 
                     # Check if the recurrence is strict (starts with '+')
                     is_strict = recurrence_value.startswith('+')
 
                     # Extract old due date if present
-                    due_date_match = re.search(DUE_DATE_REGEX, stripped_task)
+                    due_date_match = re.search(DUE_DATE_REGEX, text)
                     old_due_date = datetime.strptime(due_date_match.group(1),
                                                      '%Y-%m-%d').date() if due_date_match else None
 
@@ -397,13 +445,22 @@ class Tasks:
 
                     # Create new task with updated due date
                     new_task = re.sub(DUE_DATE_REGEX, f'due:{new_due_date_str}',
-                                      stripped_task) if old_due_date else stripped_task + f' due:{new_due_date_str}'
+                                      text) if old_due_date else text + f' due:{new_due_date_str}'
+
+                    # Remove old creation date if present
+                    if is_valid_date(new_task[0:10]):
+                        debug(f"old creation date: {new_task[0:10]}")
+                        new_task = new_task[11:] # strip creation date from new task text
+
+                    # Add new creation date if setting is enabled
+                    if setting_enabled('enableCompletionAndCreationDates'):
+                        new_task = datetime.now().strftime('%Y-%m-%d') + ' ' + new_task
 
                     # Add the new task to recurring_tasks if it doesn't already exist
                     if not self.task_already_exists(new_task):
                         recurring_tasks.append(new_task)
             else:
-                modified_tasks.append(stripped_task)
+                modified_tasks.append(text)
 
         # Write the updated tasks back to the file
         with open(self.txt_file, 'w') as f:
@@ -723,8 +780,15 @@ class TaskUI:
             link_counter = 0  # Initialize the link counter for each task
 
             # Loop through each word to apply color-coding logic
-            for word in task_words:
+            for index, word in enumerate(task_words):
                 color = 'is_complete' if is_task_complete else 'default'
+
+                if setting_enabled('hideCompletionAndCreationDates'):
+                    if index == 0 and is_valid_date(word):
+                        continue
+
+                    if index == 1 and is_valid_date(word):
+                        continue
 
                 # Apply color-coding based on the word's prefix or content
                 if not is_task_complete:
@@ -741,6 +805,8 @@ class TaskUI:
                             word = f"{word}({link_counter})"
                     elif any(word.startswith(keyword) for keyword in COLORS):
                         color = COLORS.get(word[:4], 'default')
+                    elif is_valid_date(word):
+                        color = 'is_complete'
 
                 # Restore Markdown links and count if necessary
                 if word.startswith("MDLINK"):
@@ -801,7 +867,11 @@ class TaskUI:
                 keymap_instance.refresh_displayed_tasks()
                 keymap_instance.focus_on_specific_task(__focused_task_index__)
             else:  # Add a new task
+                if setting_enabled('enableCompletionAndCreationDates'):
+                    text = datetime.now().strftime('%Y-%m-%d') + ' ' + text
                 task_exists = tasks.task_already_exists(text)
+                keymap_instance.refresh_displayed_tasks()
+                keymap_instance.focus_on_specific_task(text)
                 if not task_exists:
                     tasks.add(text)
                     keymap_instance.refresh_displayed_tasks()
