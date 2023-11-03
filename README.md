@@ -104,8 +104,6 @@ And display like this:
 
 ## Configuration
 
-### Settings
-
 * Linux: `~/.config/todo-txt-tui/settings.conf`
 * macOS: `~/Library/Application Support/todo-txt-tui/settings.conf`
 
@@ -118,12 +116,14 @@ And display like this:
 ]
 ```
 
-### Theme
+## Theme
 
 * Linux: `~/.config/todo-txt-tui/palette.conf`
 * macOS: `~/Library/Application Support/todo-txt-tui/palette.conf`
 
-**Default palette**
+Customize to your liking. Example dark and light themes follow.
+
+**Dark theme (default)**
 
 ```
 [
@@ -143,6 +143,10 @@ And display like this:
 ]
 ```
 
+**Light theme**
+
+Set the text color to black `["default", "black", ""]` and project color to `["project", "dark cyan", ""]`.
+
 See [supported colors](https://urwid.org/manual/displayattributes.html#standard-background-colors).
 
 ## Installation
@@ -153,7 +157,17 @@ Make sure you have Python installed.
 pip3 install todo-txt-tui
 ```
 
-You will be notified if a new version is available.
+### Troubleshooting
+
+Mac users may have issues with their Python installation. See [troubleshooting](troubleshooting.md).
+
+## Update
+
+You will be notified if a new version is available, but you can update manually.
+
+```
+pip3 install --upgrade todo-txt-tui
+```
 
 ![Update notification](img/update-notification.png)
 
