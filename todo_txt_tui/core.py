@@ -35,7 +35,6 @@ __current_search_query__ = ''
 __focused_task_index__ = ''
 __focused_task_text__ = ''
 
-
 # Notify user if there's an update available
 def check_for_updates(loop, keymap_instance):
     async def fetch():
@@ -50,7 +49,15 @@ def check_for_updates(loop, keymap_instance):
             if __version__ != latest_version:
                 def keypress(key):
                     if key == 'enter':
-                        subprocess.run(["pip3", "install", "--no-cache-dir", "--upgrade", __package__])
+                        # subprocess.run(["pip3", "install", "--no-cache-dir", "--upgrade", __package__])
+
+                        # Workaround (install twice) for pip using cache even if told not to
+                        subprocess.run(["pip3", "cache", "purge"])
+                        subprocess.run(["pip3", "uninstall", "-y", __package__])
+                        subprocess.run(["pip3", "install", "--no-cache-dir", __package__])
+                        subprocess.run(["pip3", "uninstall", "-y", __package__])
+                        subprocess.run(["pip3", "install", "--no-cache-dir", __package__])
+
                         os.system('clear')
                         sys.exit(
                             f"\nUpdate completed.\nIf the update failed, update manually: pip3 install --upgrade {__package__}")
