@@ -128,7 +128,7 @@ Customize to your liking. Example dark and light themes follow.
 ```
 [
     ["bold", "bold", ""],
-    ["default", "white", ""],
+    ["text", "white", ""],
     ["priority_a", "light red", ""],
     ["priority_b", "brown", ""],
     ["priority_c", "light green", ""],
@@ -145,7 +145,7 @@ Customize to your liking. Example dark and light themes follow.
 
 **Light theme**
 
-Set the text color to black `["default", "black", ""]` and project color to `["project", "dark cyan", ""]`.
+Set the text color to black `["text", "black", ""]` and project color to `["project", "dark cyan", ""]`.
 
 See [supported colors](https://urwid.org/manual/displayattributes.html#standard-background-colors).
 

@@ -91,7 +91,7 @@ def check_for_updates(loop, keymap_instance):
 # Default theme
 PALETTE = [
     ('bold', 'bold', ''),
-    ('default', 'white', ''),
+    ('text', 'white', ''),
     ('priority_a', 'light red', ''),
     ('priority_b', 'brown', ''),
     ('priority_c', 'light green', ''),
@@ -815,7 +815,7 @@ class TaskUI:
 
             # Loop through each word to apply color-coding logic
             for index, word in enumerate(task_words):
-                color = 'is_complete' if is_task_complete else 'default'
+                color = 'is_complete' if is_task_complete else 'text'
 
                 if setting_enabled('hideCompletionAndCreationDates'):
                     if index == 0 and is_valid_date(word):
@@ -838,7 +838,7 @@ class TaskUI:
                             link_counter += 1
                             word = f"{word}({link_counter})"
                     elif any(word.startswith(keyword) for keyword in COLORS):
-                        color = COLORS.get(word[:4], 'default')
+                        color = COLORS.get(word[:4], 'text')
                     elif is_valid_date(word):
                         color = 'is_complete'
 
@@ -855,7 +855,7 @@ class TaskUI:
                         word = text  # If only one link, no need for a counter
 
                 colored_task_text.append((color, word))
-                colored_task_text.append(('default', ' '))
+                colored_task_text.append(('text', ' '))
 
             # Remove the trailing space from the colored text
             colored_task_text = colored_task_text[:-1]
