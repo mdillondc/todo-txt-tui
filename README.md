@@ -8,7 +8,6 @@ Supports Linux and macOS. In theory, it should work on Windows, but I currently 
 
 * [Features](#features)
   * [Todo.txt](todo.txt.md)
-* [Installation](#installation)
 * [Keybindings](#keybindings)
 * [Configuration](#configuration)
 * [Theme](#theme)
