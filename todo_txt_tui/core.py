@@ -26,7 +26,7 @@ def is_valid_date(string):
         return False
 
 
-__version__ = '0.0.9'
+__version__ = '0.1.0'
 __package__ = 'todo-txt-tui'
 __sync_refresh_rate__ = 2
 __track_focused_task_interval__ = .1
