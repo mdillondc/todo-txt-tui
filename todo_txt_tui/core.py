@@ -30,7 +30,7 @@ __version__ = '0.0.9'
 __package__ = 'todo-txt-tui'
 __sync_refresh_rate__ = 2
 __track_focused_task_interval__ = .1
-__check_for_updates_frequency__ = 1800  # 30 minutes in seconds
+__check_for_updates_interval__ = 1800  # 30 minutes in seconds
 __current_search_query__ = ''
 __focused_task_index__ = ''
 __focused_task_text__ = ''
@@ -39,37 +39,37 @@ __focused_task_text__ = ''
 # Notify user if there's an update available
 def check_for_updates(loop, keymap_instance):
     async def fetch():
-        async with aiohttp.ClientSession() as session:
-            async with session.get(f'https://pypi.org/pypi/{__package__}/json') as response:
-                if response.status != 200:
-                    return  # Exit if the response status is not 200 OK
-                latest_version_info = await response.json()
-                latest_version = latest_version_info['info']['version']
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f'https://pypi.org/pypi/{__package__}/json') as response:
+                    if response.status != 200:
+                        return  # Exit if the response status is not 200 OK
+                    latest_version_info = await response.json()
+                    latest_version = latest_version_info['info']['version']
 
-        if __version__ != latest_version:
-            def keypress(key):
-                if key == 'enter':
-                    # Running multiple times because it's the only way I found to avoid installing from cache
-                    subprocess.run(["pip3", "cache", "purge"])
-                    subprocess.run(["pip3", "install", "--no-cache-dir", __package__])
-                    subprocess.run(["pip3", "uninstall", "-y", __package__])
-                    subprocess.run(["pip3", "install", "--no-cache-dir", "--upgrade", __package__])
-                    subprocess.run(["pip3", "uninstall", "-y", __package__])
-                    subprocess.run(["pip3", "install", "--no-cache-dir", "--upgrade", __package__])
+            if __version__ != latest_version:
+                def keypress(key):
+                    if key == 'enter':
+                        subprocess.run(["pip3", "install", "--no-cache-dir", "--upgrade", __package__])
+                        os.system('clear')
+                        sys.exit(
+                            f"\nUpdate completed.\nIf the update failed, update manually: pip3 install --upgrade {__package__}")
+                    if key in ['esc']:
+                        keymap_instance.main_frame.body = keymap_instance.tasklist_decorations
 
-                    os.system('clear')
-                    sys.exit(
-                        f"\nUpdate completed.\nIf the update failed, update manually: pip3 install --upgrade {__package__}")
-                if key in ['esc']:
-                    keymap_instance.main_frame.body = keymap_instance.tasklist_decorations
-
-            text_widget = urwid.Text(
-                f"A new version ({latest_version}) is available. Press ENTER to install (ESC to dismiss).\n\nAlternatively, update manually: pip3 install --upgrade {__package__}\n\nChangelog: https://github.com/mdillondc/todo-txt-tui/commits/")
-            bordered_layout = urwid.LineBox(text_widget, title="Update available")
-            fill = urwid.Filler(bordered_layout, 'middle')
-            overlay = urwid.Overlay(fill, keymap_instance.tasklist_decorations, 'center', 80, 'middle', 10)
-            keymap_instance.main_frame.body = overlay
-            keymap_instance.loop.unhandled_input = keypress
+                text_widget = urwid.Text(
+                    f"A new version ({latest_version}) is available. Press ENTER to install (ESC to dismiss).\n\nAlternatively, update manually: pip3 install --upgrade {__package__}\n\nChangelog: https://github.com/mdillondc/todo-txt-tui/commits/")
+                bordered_layout = urwid.LineBox(text_widget, title="Update available")
+                fill = urwid.Filler(bordered_layout, 'middle')
+                overlay = urwid.Overlay(fill, keymap_instance.tasklist_decorations, 'center', 80, 'middle', 10)
+                keymap_instance.main_frame.body = overlay
+                keymap_instance.loop.unhandled_input = keypress
+        except aiohttp.ClientConnectorError:
+            # If DNS resolution fails or there's no internet connection, fail silently.
+            pass
+        except Exception as e:
+            # If any exception, fail silently
+            pass
 
     def thread_target():
         asyncio.new_event_loop().run_until_complete(fetch())
@@ -77,8 +77,8 @@ def check_for_updates(loop, keymap_instance):
     # Start a new thread to perform the HTTP request
     threading.Thread(target=thread_target).start()
 
-    # Reschedule the function to run again in 5 seconds
-    loop.set_alarm_in(__check_for_updates_frequency__, check_for_updates, keymap_instance)
+    # Reschedule the function to run again
+    loop.set_alarm_in(__check_for_updates_interval__, check_for_updates, keymap_instance)
 
 
 # Default theme
