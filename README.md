@@ -92,11 +92,11 @@ Example: `Hello world +server @pc`.
 Automatically fixes mangled tasks. 
 
 Enter a task like this:
-  * `Go +someProject to @work [YouTube](https://youtube.com) and watch [these beautiful dogs!](https://www.youtube.com/watch?v=1VHRiwma05c). rec:+1d @pc +hello due:2023-01-01`
+  * `Go +someProject to @work [YouTube](https://youtube.com) and (B) watch [these beautiful dogs!](https://www.youtube.com/watch?v=1VHRiwma05c). rec:+1d @pc +hello due:2023-01-01`
 
 It will be reconstructed like this:
 
-  * `Go to [YouTube](https://youtube.com) and watch [these beautiful dogs!](https://www.youtube.com/watch?v=1VHRiwma05c). +hello +someProject @pc @work due:2023-01-01 rec:+1d`
+  * `(B) Go to [YouTube](https://youtube.com) and watch [these beautiful dogs!](https://www.youtube.com/watch?v=1VHRiwma05c). +hello +someProject @pc @work due:2023-01-01 rec:+1d`
 
 And display like this:
 
