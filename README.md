@@ -2,6 +2,8 @@
 
 A powerful, keyboard-driven terminal application for managing todo.txt files.
 
+![Screenshot](img/screenshot.png)
+
 Supports Linux and macOS. In theory, it should work on Windows, but I currently have no plans on testing this.
 
 * [Features](#features)
@@ -12,8 +14,6 @@ Supports Linux and macOS. In theory, it should work on Windows, but I currently 
 * [Theme](#theme)
 * [Installation](#installation)
 * [Usage](#usage)
-
-![Screenshot](img/screenshot.png)
 
 ## Features
 
