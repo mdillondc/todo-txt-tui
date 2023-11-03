@@ -109,7 +109,7 @@ And display like this:
 
 **Default settings**
 
-```
+```json
 [
     ["enableCompletionAndCreationDates", "true"],
     ["hideCompletionAndCreationDates", "true"]
@@ -125,7 +125,7 @@ Customize to your liking. Example dark and light themes follow.
 
 **Dark theme (default)**
 
-```
+```json
 [
     ["bold", "bold", ""],
     ["text", "white", ""],
