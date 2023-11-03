@@ -152,7 +152,7 @@ This is optional.
 
 The dark theme above should work just fine (text color and background adjusts to your terminal). You may however, want to change project color to e.g. `["project", "dark cyan", ""]` since yellow on white can be hard to read.
 
-See [supported colors](https://urwid.org/manual/displayattributes.html#standard-background-colors).
+See [supported colors](https://urwid.org/manual/displayattributes.html#standard-foreground-colors).
 
 ## Installation
 
