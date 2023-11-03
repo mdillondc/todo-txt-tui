@@ -2,8 +2,6 @@
 
 macOS will prompt you to install pip when you first try using it, however they way macOS installs it can cause issues. *So if you have issues*, I recommend using Homebrew instead.
 
-If you have already installed Python this way, and you experience issues installing TodoTxtTUI.
-
 1. Remove old installation
 
 ```
