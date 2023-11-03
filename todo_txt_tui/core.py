@@ -91,7 +91,7 @@ def check_for_updates(loop, keymap_instance):
 # Default theme
 PALETTE = [
     ('bold', 'bold', ''),
-    ('text', 'white', ''),
+    ('text', '', ''), # Default to terminal
     ('priority_a', 'light red', ''),
     ('priority_b', 'brown', ''),
     ('priority_c', 'light green', ''),
@@ -103,6 +103,9 @@ PALETTE = [
     ('is_danger', 'light red', ''),
     ('is_success', 'light green', ''),
     ('is_link', 'light blue', ''),
+    ('heading_overdue', 'light red,italics,bold', ''),
+    ('heading_today', 'light green,italics,bold', ''),
+    ('heading_future', 'default,italics,bold', ''),
 ]
 
 # Check if user has defined a custom color palette
@@ -777,11 +780,11 @@ class TaskUI:
 
                 # Color the heading based on its relation to today's date
                 if due_date_obj and due_date_obj.date() < today:
-                    heading_text = urwid.Text(('is_danger', heading_str))
+                    heading_text = urwid.Text(('heading_overdue', heading_str + ' (Overdue)'))
                 elif due_date_obj and due_date_obj.date() == today:
-                    heading_text = urwid.Text(('is_success', heading_str))
+                    heading_text = urwid.Text(('heading_today', heading_str + ' (Today)'))
                 else:
-                    heading_text = urwid.Text(('bold', heading_str))
+                    heading_text = urwid.Text(('heading_future', heading_str))
 
                 # Add a divider between sections (skipped for the first heading)
                 if not first_heading:

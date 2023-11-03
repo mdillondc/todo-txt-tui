@@ -104,10 +104,12 @@ And display like this:
 
 ## Configuration
 
+This is optional.
+
 * Linux: `~/.config/todo-txt-tui/settings.conf`
 * macOS: `~/Library/Application Support/todo-txt-tui/settings.conf`
 
-**Default settings**
+**Settings (default):**
 
 ```json
 [
@@ -118,12 +120,12 @@ And display like this:
 
 ## Theme
 
+This is optional.
+
 * Linux: `~/.config/todo-txt-tui/palette.conf`
 * macOS: `~/Library/Application Support/todo-txt-tui/palette.conf`
 
-Customize to your liking. Example dark and light themes follow.
-
-**Dark theme (default)**
+**Theme (default):**
 
 ```json
 [
@@ -139,13 +141,16 @@ Customize to your liking. Example dark and light themes follow.
     ["is_complete", "dark gray", ""],
     ["is_danger", "light red", ""],
     ["is_success", "light green", ""],
-    ["is_link", "light blue", ""]
+    ["is_link", "light blue", ""],
+    ["heading_overdue", "light red,italics,bold", ""],
+    ["heading_today", "light green,italics,bold", ""],
+    ["heading_future", "default,italics,bold", ""]
 ]
 ```
 
-**Light theme**
+**Light theme:**
 
-Set the text color to black `["text", "black", ""]` and project color to `["project", "dark cyan", ""]`.
+The dark theme above should work just fine (text color and background adjusts to your terminal). You may however, want to change project color to e.g. `["project", "dark cyan", ""]` since yellow on white can be hard to read.
 
 See [supported colors](https://urwid.org/manual/displayattributes.html#standard-background-colors).
 
