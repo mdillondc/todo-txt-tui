@@ -7,11 +7,12 @@ A powerful, keyboard-driven terminal application for managing todo.txt files.
 Supports Linux and macOS. In theory, it should work on Windows, but I currently have no plans on testing this.
 
 * [Features](#features)
-  * [Todo.txt](todo.txt.md)
+  * [Todo.txt and features explained](todo.txt.md)
 * [Keybindings](#keybindings)
 * [Configuration](#configuration)
 * [Theme](#theme)
 * [Installation](#installation)
+  * [How to update](#how-to-update)
 * [Usage](#usage)
 
 ## Features
@@ -116,7 +117,7 @@ pip3 install todo-txt-tui
 
 Mac users may have issues with their Python installation. See [troubleshooting](troubleshooting.md).
 
-## Update
+### How to update
 
 You will be notified if a new version is available, but you can update manually.
 
@@ -145,3 +146,6 @@ todo-txt-tui --help
 
 **Original idea**  
 Read more at [todotxt.org](http://todotxt.org/). Gina Trapani originally came up with the idea. It has since been extended, e.g. with recurring tasks and other features.
+
+**More**  
+See [high level features overview](#features) and [details](todo.txt.md).
