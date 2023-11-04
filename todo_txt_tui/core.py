@@ -35,6 +35,7 @@ __current_search_query__ = ''
 __focused_task_index__ = ''
 __focused_task_text__ = ''
 
+
 # Notify user if there's an update available
 def check_for_updates(loop, keymap_instance):
     async def fetch():
@@ -91,7 +92,7 @@ def check_for_updates(loop, keymap_instance):
 # Default theme
 PALETTE = [
     ('bold', 'bold', ''),
-    ('text', '', ''), # Default to terminal
+    ('text', '', ''),  # Default to terminal
     ('priority_a', 'light red', ''),
     ('priority_b', 'brown', ''),
     ('priority_c', 'light green', ''),
@@ -237,7 +238,7 @@ class Tasks:
             recurrence_match = re.search(RECURRENCE_REGEX, task_text)
 
             # If the task is completed, remove 'x ' from the beginning
-            # This is handled later in `def complete`
+            # This is handled later in `complete`
             if completed:
                 task_text = task_text[2:]
 
@@ -311,7 +312,7 @@ class Tasks:
             f.write(normalized_task)
 
         keymap_instance.refresh_displayed_tasks()
-        keymap_instance.focus_on_specific_task(normalized_task)
+        keymap_instance.focus_on_specific_task(normalized_task.strip())
 
     # Edits an existing task in the task file
     def edit(self, old_task, new_task):
@@ -420,21 +421,34 @@ class Tasks:
 
                 # Toggle the task's completed state
                 if is_complete:
+                    modified_task = text[2:]  # Slice off "x " to make the task incomplete
+
                     if setting_enabled('enableCompletionAndCreationDates'):
-                        # Check if what follows "x " is a date
-                        if len(text) >= 15 and is_valid_date(text[2:12]):
-                            # If there's a date, slice off "x " and the date with the trailing space
-                            modified_task = text[13:]
-                        else:
-                            # If there's no date, just slice off "x " which is the first 2 characters
-                            modified_task = text[2:]
+                        if len(modified_task) >= 14 and is_valid_date(
+                                modified_task[4:14]):  # Task has creation date and priority
+                            # Remove completion date since the task is no longer marked complete
+                            modified_task = modified_task[:4] + modified_task[15:]
+
+                        elif len(modified_task) >= 10 and is_valid_date(
+                                modified_task[0:10]):  # Task has creation date but no priority
+                            # Remove the completion date from the task
+                            modified_task = modified_task[10:]
+
                 else:
+                    has_priority = bool(re.match(r'^\([A-Z]\)', text[0:3]))
+                    priority = text[0:3]
+
                     if setting_enabled('enableCompletionAndCreationDates'):
-                        modified_task = 'x ' + datetime.now().strftime('%Y-%m-%d') + ' ' + text
+                        if has_priority:
+                            modified_task = 'x ' + priority + ' ' + datetime.now().strftime('%Y-%m-%d') + re.sub(
+                                r'^\([A-Z]\)', '', text)
+                        else:
+                            modified_task = 'x ' + datetime.now().strftime('%Y-%m-%d') + ' ' + text
                     else:
                         modified_task = 'x ' + text
 
-                modified_tasks.append(modified_task)
+                # Remove any extra white spaces
+                modified_tasks.append(re.sub(r'\s+', ' ', modified_task).strip())
 
                 # Handle recurring tasks
                 if "rec:" in text and not is_complete:
@@ -549,13 +563,16 @@ class Tasks:
         projects.sort(key=str.casefold)
         contexts.sort(key=str.casefold)
 
+        restructured_task = ''  # Init
+
         # Construct the task in the correct order
-        restructured_task = ' '.join(task_text_dates)  # Add dates
         if priority:
-            restructured_task += ' ' + priority if restructured_task else priority  # Add priority if present
+            restructured_task += ' ' + priority + ' '
+
+        # Add dates
+        restructured_task += ' '.join(task_text_dates)
 
         restructured_task += ' ' + ' '.join(task_text) if restructured_task else ' '.join(task_text)
-        # Add the main task text, ensuring not to add an extra space at the start
 
         if projects:
             restructured_task += " " + " ".join(projects)
