@@ -231,18 +231,14 @@ class Tasks:
     @staticmethod
     def sort(tasks):
         def parse(task_text):
-            # Using regular expressions to search for priority, due date, and recurrence in the task line
             priority_match = re.search(PRIORITY_REGEX, task_text)
             due_date_match = re.search(DUE_DATE_REGEX, task_text)
             completed = task_text.startswith('x ')
             recurrence_match = re.search(RECURRENCE_REGEX, task_text)
 
-            # If the task is completed, remove 'x ' from the beginning
-            # This is handled later in `complete`
             if completed:
                 task_text = task_text[2:]
 
-            # Create and return a dictionary containing the parsed attributes for each task
             return {
                 'text': task_text,
                 'priority': priority_match.group(1) if priority_match else None,
@@ -252,35 +248,29 @@ class Tasks:
             }
 
         def get_sort_key(task):
-            # Ignore completion/creation dates for sorting
-            sort_text = task['text']
-            if task['completed']:
-                # Skip 'x ' and the first (completion) date
-                if is_valid_date(sort_text[:10]):
-                    # Remove the first date and the trailing space
-                    sort_text = sort_text[11:]
-                    if is_valid_date(sort_text[:10]):
-                        # Remove the second (creation) date and the trailing space
-                        sort_text = sort_text[11:]
-            else:
-                if is_valid_date(sort_text[:10]):
-                    # Skip the date and a space
-                    sort_text = sort_text[11:]
+            # Convert due_date to a date object for proper sorting, default to a date far in the future if None
+            due_date_key = datetime.strptime(task['due_date'], '%Y-%m-%d').date() if task['due_date'] else datetime(9999, 12, 31).date()
 
-            # Extract priority for sorting
-            priority = task['priority'] if task['priority'] is not None else 'Z'
+            sort_text = ''
+            words = task['text'].split()
 
-            # Construct the sorting key
-            return (
-                task['due_date'] if task['due_date'] is not None else '9999-99-99',
-                priority,  # Sort by priority next
-                sort_text.strip().lower()  # Then by the task text without dates
-            )
+            for index, word in enumerate(words):
+                if index == 0 and word == 'x':
+                    continue
+                elif is_valid_date(word.strip()):
+                    continue
+                else:
+                    sort_text += word + ' '
+
+            # Remove trailing whitespace and convert to lowercase for case-insensitive sorting
+            sort_text = sort_text.strip().lower()
+
+            return (due_date_key, sort_text)
 
         # Parse each task line into a dictionary of its components
         parsed_tasks = [parse(task) for task in tasks]
 
-        # Sort tasks first by due date, then by priority, and lastly by text
+        # Sort tasks by due date, then by text
         parsed_tasks.sort(key=get_sort_key)
 
         return parsed_tasks
@@ -297,6 +287,10 @@ class Tasks:
 
         # Convert NLP dates to actual dates
         normalized_task = self.convert_nlp_to_dates(normalized_task)
+
+        # Don't add task if it already exists
+        if self.task_already_exists(normalized_task):
+            return
 
         # Check if the file is empty
         file_is_empty = False
@@ -322,6 +316,10 @@ class Tasks:
 
         # Convert NLP dates to actual dates
         normalized_new_task = self.convert_nlp_to_dates(normalized_new_task)
+
+        # Don't edit task if it already exists
+        if self.task_already_exists(normalized_new_task):
+            return
 
         # Read all tasks from the file
         with open(self.txt_file, 'r') as f:
@@ -563,25 +561,30 @@ class Tasks:
         projects.sort(key=str.casefold)
         contexts.sort(key=str.casefold)
 
-        restructured_task = ''  # Init
-
         # Construct the task in the correct order
+        restructured_task_parts = []
+
+        # Add priority if it exists
         if priority:
-            restructured_task += priority + ' '
+            restructured_task_parts.append(priority)
 
-        # Add dates
-        restructured_task += ' '.join(task_text_dates) + ' '
+        # Add dates if they exist
+        if task_text_dates:
+            restructured_task_parts.append(' '.join(task_text_dates))
 
-        restructured_task += ' '.join(task_text) if restructured_task else ' '.join(task_text)
+        # Add the main task text
+        restructured_task_parts.extend(task_text)
 
-        if projects:
-            restructured_task += " " + " ".join(projects)
-        if contexts:
-            restructured_task += " " + " ".join(contexts)
+        # Add the projects, contexts, due date, and rec_rule if they exist
+        restructured_task_parts.extend(projects)
+        restructured_task_parts.extend(contexts)
         if due_date:
-            restructured_task += " " + due_date
+            restructured_task_parts.append(due_date)
         if rec_rule:
-            restructured_task += " " + rec_rule
+            restructured_task_parts.append(rec_rule)
+
+        # Join all parts with a single space
+        restructured_task = ' '.join(restructured_task_parts)
 
         # If the task is complete, prepend 'x' to the task
         if complete:
@@ -923,6 +926,7 @@ class TaskUI:
             else:  # Add a new task
                 if setting_enabled('enableCompletionAndCreationDates'):
                     text = datetime.now().strftime('%Y-%m-%d') + ' ' + text
+
                 task_exists = tasks.task_already_exists(text)
                 if not task_exists:
                     tasks.add(keymap_instance, text)
