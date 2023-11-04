@@ -249,7 +249,8 @@ class Tasks:
 
         def get_sort_key(task):
             # Convert due_date to a date object for proper sorting, default to a date far in the future if None
-            due_date_key = datetime.strptime(task['due_date'], '%Y-%m-%d').date() if task['due_date'] else datetime(9999, 12, 31).date()
+            due_date_key = datetime.strptime(task['due_date'], '%Y-%m-%d').date() if task['due_date'] else datetime(
+                9999, 12, 31).date()
 
             sort_text = ''
             words = task['text'].split()
@@ -288,10 +289,6 @@ class Tasks:
         # Convert NLP dates to actual dates
         normalized_task = self.convert_nlp_to_dates(normalized_task)
 
-        # Don't add task if it already exists
-        if self.task_already_exists(normalized_task):
-            return
-
         # Check if the file is empty
         file_is_empty = False
         try:
@@ -300,10 +297,11 @@ class Tasks:
             file_is_empty = True  # File doesn't exist, so consider it as empty
 
         # Append the new task to the file
-        with open(self.txt_file, 'a') as f:
-            if not file_is_empty:
-                f.write('\n')
-            f.write(normalized_task)
+        if not self.task_already_exists(normalized_task):
+            with open(self.txt_file, 'a') as f:
+                if not file_is_empty:
+                    f.write('\n')
+                f.write(normalized_task)
 
         keymap_instance.refresh_displayed_tasks()
         keymap_instance.focus_on_specific_task(normalized_task.strip())
@@ -316,10 +314,6 @@ class Tasks:
 
         # Convert NLP dates to actual dates
         normalized_new_task = self.convert_nlp_to_dates(normalized_new_task)
-
-        # Don't edit task if it already exists
-        if self.task_already_exists(normalized_new_task):
-            return
 
         # Read all tasks from the file
         with open(self.txt_file, 'r') as f:
@@ -927,9 +921,7 @@ class TaskUI:
                 if setting_enabled('enableCompletionAndCreationDates'):
                     text = datetime.now().strftime('%Y-%m-%d') + ' ' + text
 
-                task_exists = tasks.task_already_exists(text)
-                if not task_exists:
-                    tasks.add(keymap_instance, text)
+                tasks.add(keymap_instance, text)
 
         # Initialize urwid Edit widget
         ask = urwid.Edit()
