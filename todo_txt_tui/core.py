@@ -567,12 +567,12 @@ class Tasks:
 
         # Construct the task in the correct order
         if priority:
-            restructured_task += ' ' + priority + ' '
+            restructured_task += priority + ' '
 
         # Add dates
-        restructured_task += ' '.join(task_text_dates)
+        restructured_task += ' '.join(task_text_dates) + ' '
 
-        restructured_task += ' ' + ' '.join(task_text) if restructured_task else ' '.join(task_text)
+        restructured_task += ' '.join(task_text) if restructured_task else ' '.join(task_text)
 
         if projects:
             restructured_task += " " + " ".join(projects)
@@ -587,7 +587,7 @@ class Tasks:
         if complete:
             restructured_task = 'x ' + restructured_task
 
-        return restructured_task
+        return restructured_task.strip()
 
     # Normalizes a single task by removing extra spaces and restructuring it
     def normalize_task(self, task_text):
@@ -814,7 +814,7 @@ class TaskUI:
             # Prepare the task line for display
             task_line = task['text'].strip()
             is_task_complete = task['completed']  # Determine if the task is complete
-            colored_task_text = []
+            display_text = []
 
             # Handle Markdown links and replace them with placeholders
             md_links = re.findall(r'\[(.*?)\]\((https?://\S+|file://\S+)\)', task_line)
@@ -842,6 +842,9 @@ class TaskUI:
                         continue
 
                     if index == 1 and is_valid_date(word):
+                        continue
+
+                    if index == 2 and is_valid_date(word):
                         continue
 
                 # Apply color-coding based on the word's prefix or content
@@ -874,17 +877,15 @@ class TaskUI:
                     else:
                         word = text  # If only one link, no need for a counter
 
-                colored_task_text.append((color, word))
-                colored_task_text.append(('text', ' '))
+                display_text.append((color, word))
+                display_text.append(('text', ' '))
 
             # Remove the trailing space from the colored text
-            colored_task_text = colored_task_text[:-1]
+            display_text = display_text[:-1]
 
             # Create a custom checkbox for the task and apply the color scheme
-            # Create a custom checkbox for the task and apply the color scheme
-            original_text_with_x = 'x ' + task['text'].strip() if task['completed'] else task['text'].strip()
-            checkbox = CustomCheckBox(colored_task_text, state=task['completed'], original_text=original_text_with_x)
-            # checkbox = CustomCheckBox(colored_task_text, state=task['completed'], original_text=task['text'].strip())
+            original_text = 'x ' + task['text'].strip() if task['completed'] else task['text'].strip()
+            checkbox = CustomCheckBox(display_text, state=task['completed'], original_text=original_text)
 
             wrapped_checkbox = urwid.AttrMap(checkbox, None, focus_map='bold')
 
