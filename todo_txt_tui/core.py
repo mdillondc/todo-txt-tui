@@ -470,13 +470,27 @@ class Tasks:
                     new_task = re.sub(DUE_DATE_REGEX, f'due:{new_due_date_str}',
                                       text) if old_due_date else text + f' due:{new_due_date_str}'
 
-                    # Remove old creation date if present
-                    if is_valid_date(new_task[0:10]):
+                    has_priority = False
+
+                    # Remove old creation date if present (for tasks without priority)
+                    if len(modified_task) >= 10 and is_valid_date(new_task[0:10]):
                         new_task = new_task[11:]  # strip creation date from new task text
+
+                    # Remove old creation date if present (for tasks with priority)
+                    if len(modified_task) >= 14 and is_valid_date(new_task[4:14]):
+                        new_task = new_task[:3] + new_task[14:]  # strip creation date from new task text
+                        has_priority = True
 
                     # Add new creation date if setting is enabled
                     if setting_enabled('enableCompletionAndCreationDates'):
-                        new_task = datetime.now().strftime('%Y-%m-%d') + ' ' + new_task
+                        if not has_priority:
+                            new_task = datetime.now().strftime('%Y-%m-%d') + ' ' + new_task
+                        else:
+                            priority = new_task[:4]
+                            text = new_task[3:]
+                            debug(priority)
+                            debug(text)
+                            new_task = priority + datetime.now().strftime('%Y-%m-%d') + text
 
                     # Add the new task to recurring_tasks if it doesn't already exist
                     if not self.task_already_exists(new_task):
