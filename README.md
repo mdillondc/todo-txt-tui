@@ -7,13 +7,14 @@ A powerful, keyboard-driven terminal application for managing todo.txt files.
 Supports Linux and macOS. In theory, it should work on Windows, but I currently have no plans on testing this.
 
 * [Features](#features)
-  * [Todo.txt and features explained](todo.txt.md)
 * [Keybindings](#keybindings)
 * [Configuration](#configuration)
 * [Theme](#theme)
 * [Installation](#installation)
   * [How to update](#how-to-update)
 * [Usage](#usage)
+* [Todo.txt explained](todo.txt.md)
+
 
 ## Features
 
@@ -81,7 +82,7 @@ This is optional.
 ```json
 [
     ["bold", "bold", ""],
-    ["text", "white", ""],
+    ["text", "", ""],
     ["priority_a", "light red", ""],
     ["priority_b", "brown", ""],
     ["priority_c", "light green", ""],
