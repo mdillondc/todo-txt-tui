@@ -1,6 +1,24 @@
 # Todo.txt
 
-Note! This list does not explain every feature of TodoTxtTUI, but it does explain the most important aspects of the todo.txt format, as well as some quality-of-life improvements unique to TodoTxtTUI. 
+Note! This list does not explain every feature of TodoTxtTUI, but it does explain the most important aspects of the todo.txt format, as well as some quality-of-life improvements unique to TodoTxtTUI.
+
+# Task structure
+
+```
+x (A) 2024-01-20 2024-01-10 Verify harddrive health +personal @pc due:2023-01-20 rec:+1m 
+```
+
+| Component                 | Explanation                               |
+|---------------------------|-------------------------------------------|
+| `x`                       | Indicates that the task is complete       |
+| `(A)`                     | The task has the highest priority         |
+| `2024-01-20`              | The task was completed on 2024-01-20      |
+| `2024-01-10`              | The task was created on 2024-01-10        |
+| `Verify harddrive health` | Task text                                 |
+| `+personal`               | Task project                              |
+| `@pc`                     | Task context                              |
+| `due:2023-01-20`          | Task is due 2024-01-20                    |
+| `rec:+1m`                 | Task will repeat on the 20th every month  |
 
 ## Priorities
 
@@ -57,3 +75,14 @@ It will be reconstructed like this:
 And display like this:
 
 ![Reconstructed task](img/reconstructed-task.png)
+
+## Links
+
+Tasks can multiple links either plain or in markdown.
+
+```
+Hello [world](https://example.com)
+Another task https://example.com
+```
+
+See [Keybindings](https://github.com/mdillondc/todo-txt-tui/tree/main#keybindings) for how to open links.
