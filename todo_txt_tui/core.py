@@ -26,7 +26,7 @@ def is_valid_date(string):
         return False
 
 
-__version__ = '0.1.5'
+__version__ = '0.1.6'
 __package__ = 'todo-txt-tui'
 __sync_refresh_rate__ = 2
 __track_focused_task_interval__ = .1
@@ -488,8 +488,6 @@ class Tasks:
                         else:
                             priority = new_task[:4]
                             text = new_task[3:]
-                            debug(priority)
-                            debug(text)
                             new_task = priority + datetime.now().strftime('%Y-%m-%d') + text
 
                     # Add the new task to recurring_tasks if it doesn't already exist
