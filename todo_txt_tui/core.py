@@ -938,10 +938,22 @@ class TaskUI:
         # Initialize urwid Edit widget
         ask = urwid.Edit()
 
+        def find_task_text_end(task_text):
+            # Identifiers for project, context, due date, and recurrence
+            identifiers = [' +', ' @', ' due:', ' rec:']
+            # Find the first occurrence of any identifier
+            first_identifier_pos = min([task_text.find(idf) for idf in identifiers if task_text.find(idf) != -1],
+                                       default=len(task_text))
+            return first_identifier_pos
+
         # If default_text is provided, pre-fill the Edit widget
         if default_text:
-            ask.set_edit_text(default_text)
-            ask.set_edit_pos(len(default_text))
+            cursor_pos = find_task_text_end(default_text)
+            # Insert a space before the cursor position
+            default_text_with_space = default_text[:cursor_pos] + ' ' + default_text[cursor_pos:]
+            ask.set_edit_text(default_text_with_space)
+            # Set the cursor position to one after the inserted space
+            ask.set_edit_pos(cursor_pos + 1)
 
         # Create BoxAdapter to hold suggestions with a height of 1
         suggestions_box_adapter = urwid.BoxAdapter(keymap_instance.auto_suggestions.dialog, height=1)
