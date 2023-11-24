@@ -66,7 +66,8 @@ This is optional.
 ```json
 [
     ["enableCompletionAndCreationDates", "true"],
-    ["hideCompletionAndCreationDates", "true"]
+    ["hideCompletionAndCreationDates", "true"], 
+    ["placeCursorBeforeMetadataWhenEditingTasks", "false"]
 ]
 ```
 

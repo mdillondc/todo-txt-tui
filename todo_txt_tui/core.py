@@ -154,6 +154,7 @@ COLORS = {
 SETTINGS = [
     ('enableCompletionAndCreationDates', 'true'),
     ('hideCompletionAndCreationDates', 'true'),
+    ('placeCursorBeforeMetadataWhenEditingTasks', 'false')
 ]
 
 if os.path.exists(settings_path):
@@ -948,12 +949,17 @@ class TaskUI:
 
         # If default_text is provided, pre-fill the Edit widget
         if default_text:
-            cursor_pos = find_task_text_end(default_text)
-            # Insert a space before the cursor position
-            default_text_with_space = default_text[:cursor_pos] + ' ' + default_text[cursor_pos:]
-            ask.set_edit_text(default_text_with_space)
-            # Set the cursor position to one after the inserted space
-            ask.set_edit_pos(cursor_pos + 1)
+            if setting_enabled('placeCursorBeforeMetadataWhenEditingTasks'):
+                cursor_pos = find_task_text_end(default_text)
+                # Insert a space before the cursor position
+                default_text_with_space = default_text[:cursor_pos] + ' ' + default_text[cursor_pos:]
+                ask.set_edit_text(default_text_with_space)
+                # Set the cursor position to one after the inserted space
+                ask.set_edit_pos(cursor_pos + 1)
+            else:
+                ask.set_edit_text(default_text)
+                # Place the cursor at the end of the text
+                ask.set_edit_pos(len(default_text))
 
         # Create BoxAdapter to hold suggestions with a height of 1
         suggestions_box_adapter = urwid.BoxAdapter(keymap_instance.auto_suggestions.dialog, height=1)
