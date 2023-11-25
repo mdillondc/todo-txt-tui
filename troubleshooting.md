@@ -1,6 +1,6 @@
 ## How to install Python on macOS
 
-macOS will prompt you to install pip when you first try using it, however they way macOS installs it can cause issues. *So if you have issues*, I recommend using Homebrew instead.
+macOS will prompt you to install pip when you first try using it, however the way macOS installs it can cause issues. *So if you have issues*, I recommend using Homebrew instead.
 
 1. Remove old installation
 
