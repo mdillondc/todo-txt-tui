@@ -31,6 +31,7 @@ Supports Linux and macOS. In theory, it should work on Windows, but I currently 
 - **Sync**: Changes made in todo.txt outside the application will be reflected in the app.
 - **Keyboard driven**: Navigate and manipulate everything from your keyboard with vim-inspired keys.
 - **Custom themes**: See [Configuration](#configuration).
+- **Hidden tasks**: See keybindings and [Configuration](#configuration)
 - Much more...
 
 ## Keybindings
@@ -52,6 +53,8 @@ Supports Linux and macOS. In theory, it should work on Windows, but I currently 
 - `u`: Open URL in focused task
     - If task has multiple URLs, press `u` followed by e.g. `2` to open the second URL
     - `U` Open all URLs in task
+- `h`: Toggle display of tasks that contain the word `:hidden`
+  - Default setting can set in [Configuration](#configuration)
 - `q`: Quit application
 
 ## Configuration
@@ -67,7 +70,8 @@ This is optional.
 [
     ["enableCompletionAndCreationDates", "true"],
     ["hideCompletionAndCreationDates", "true"], 
-    ["placeCursorBeforeMetadataWhenEditingTasks", "false"]
+    ["placeCursorBeforeMetadataWhenEditingTasks", "false"],
+    ["displayHiddenTasksByDefault", "false"]
 ]
 ```
 

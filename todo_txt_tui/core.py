@@ -154,7 +154,8 @@ COLORS = {
 SETTINGS = [
     ('enableCompletionAndCreationDates', 'true'),
     ('hideCompletionAndCreationDates', 'true'),
-    ('placeCursorBeforeMetadataWhenEditingTasks', 'false')
+    ('placeCursorBeforeMetadataWhenEditingTasks', 'false'),
+    ('displayHiddenTasksByDefault', 'false')
 ]
 
 if os.path.exists(settings_path):
@@ -542,6 +543,7 @@ class Tasks:
         due_date = ""
         rec_rule = ""
         complete = False
+        hidden_tag = None  # Initialize hidden tag variable
 
         words = task.split()
 
@@ -561,6 +563,8 @@ class Tasks:
                 task_text_dates.append(word)
             elif re.match(r'^\([A-Z]\)', word):
                 priority = word
+            elif word == ':hidden':
+                hidden_tag = word  # Store the hidden tag separately
             else:
                 task_text.append(word)
 
@@ -590,6 +594,10 @@ class Tasks:
         if rec_rule:
             restructured_task_parts.append(rec_rule)
 
+        # Add the hidden tag if it was present
+        if hidden_tag:
+            restructured_task_parts.append(hidden_tag)
+
         # Join all parts with a single space
         restructured_task = ' '.join(restructured_task_parts)
 
@@ -598,6 +606,7 @@ class Tasks:
             restructured_task = 'x ' + restructured_task
 
         return restructured_task.strip()
+
 
     # Normalizes a single task by removing extra spaces and restructuring it
     def normalize_task(self, task_text):
@@ -790,6 +799,10 @@ class TaskUI:
             if __current_search_query__ and __current_search_query__.lower() not in task['text'].lower():
                 continue
 
+            # Check for hidden tasks based on the setting
+            if ':hidden' in task['text'] and not setting_enabled('displayHiddenTasksByDefault'):
+                continue
+
             # Extract the due date from the current task
             due_date = task['due_date']
 
@@ -859,7 +872,9 @@ class TaskUI:
 
                 # Apply color-coding based on the word's prefix or content
                 if not is_task_complete:
-                    if word.startswith('@'):
+                    if word == ':hidden':
+                        color = 'is_complete'
+                    elif word.startswith('@'):
                         color = 'context'
                     elif word.startswith('+'):
                         color = 'project'
@@ -1140,6 +1155,18 @@ class Body(urwid.ListBox):
         super(Body, self).__init__(urwid.SimpleFocusListWalker(
             TaskUI.render_and_display_tasks(tasks.sort(tasks.read()), PALETTE).widget_list))
 
+    def toggle_display_hidden_tasks_setting(self):
+        """
+        Toggles the 'displayHiddenTasksByDefault' setting.
+        """
+        global SETTINGS
+        for i, setting in enumerate(SETTINGS):
+            if setting[0] == 'displayHiddenTasksByDefault':
+                current_value = setting[1].lower() == 'true'
+                new_value = 'false' if current_value else 'true'
+                SETTINGS[i] = ('displayHiddenTasksByDefault', new_value)
+                break
+
     def refresh_displayed_tasks(self):
         # Refresh the displayed tasks by reading and sorting tasks again
         tasks = Tasks(self.txt_file)
@@ -1344,6 +1371,11 @@ class Body(urwid.ListBox):
                         subprocess.run(['start', url], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
                     elif os_type == 'Darwin':
                         subprocess.run(['open', url], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+
+        # Toggle 'displayHiddenTasksByDefault' setting
+        elif key == 'h':
+            self.toggle_display_hidden_tasks_setting()
+            self.refresh_displayed_tasks()
 
         # Pass the keypress event to the parent class if no match is found
         else:
