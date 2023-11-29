@@ -1064,7 +1064,7 @@ class AutoSuggestions:
         tasks = Tasks(self.txt_file)  # Initialize Tasks
         for task in tasks.read():  # Loop through all tasks
             # Regex to find context tags, making sure they are properly bounded
-            for match in re.finditer(r'(^| )@(\w+)( |$)', task):
+            for match in re.finditer(r'(^| )@([^ ]+)( |$)', task):
                 contexts.add(match.group(2))  # Add the context to the set
         return list(contexts)  # Convert set to list and return
 
@@ -1078,7 +1078,7 @@ class AutoSuggestions:
         tasks = Tasks(self.txt_file)  # Initialize Tasks
         for task in tasks.read():  # Loop through all tasks
             # Regex to find project tags, making sure they are properly bounded
-            for match in re.finditer(r'(^| )\+(\w+)( |$)', task):
+            for match in re.finditer(r'(^| )\+([^ ]+)( |$)', task):
                 projects.add(match.group(2))  # Add the project to the set
         return list(projects)  # Convert set to list and return
 
