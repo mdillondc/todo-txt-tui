@@ -53,8 +53,8 @@ Supports Linux and macOS. In theory, it should work on Windows, but I currently 
 - `u`: Open URL in focused task
     - If task has multiple URLs, press `u` followed by e.g. `2` to open the second URL
     - `U` Open all URLs in task
-- `h`: Toggle display of tasks that contain the word `:hidden`
-  - Default setting can set in [Configuration](#configuration)
+- `h`: Toggle hidden tasks contain the word `h:1`
+  - Hidden by default, but can be changed in [Configuration](#configuration)
 - `q`: Quit application
 
 ## Configuration

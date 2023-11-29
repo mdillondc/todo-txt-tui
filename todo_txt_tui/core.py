@@ -563,7 +563,7 @@ class Tasks:
                 task_text_dates.append(word)
             elif re.match(r'^\([A-Z]\)', word):
                 priority = word
-            elif word == ':hidden':
+            elif word == 'h:1':
                 hidden_tag = word  # Store the hidden tag separately
             else:
                 task_text.append(word)
@@ -606,7 +606,6 @@ class Tasks:
             restructured_task = 'x ' + restructured_task
 
         return restructured_task.strip()
-
 
     # Normalizes a single task by removing extra spaces and restructuring it
     def normalize_task(self, task_text):
@@ -800,7 +799,7 @@ class TaskUI:
                 continue
 
             # Check for hidden tasks based on the setting
-            if ':hidden' in task['text'] and not setting_enabled('displayHiddenTasksByDefault'):
+            if 'h:1' in task['text'] and not setting_enabled('displayHiddenTasksByDefault'):
                 continue
 
             # Extract the due date from the current task
@@ -872,7 +871,7 @@ class TaskUI:
 
                 # Apply color-coding based on the word's prefix or content
                 if not is_task_complete:
-                    if word == ':hidden':
+                    if word == 'h:1':
                         color = 'is_complete'
                     elif word.startswith('@'):
                         color = 'context'
