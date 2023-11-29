@@ -1375,6 +1375,7 @@ class Body(urwid.ListBox):
         elif key == 'h':
             self.toggle_display_hidden_tasks_setting()
             self.refresh_displayed_tasks()
+            self.focus_on_specific_task(__focused_task_text__)
 
         # Pass the keypress event to the parent class if no match is found
         else:
