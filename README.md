@@ -49,6 +49,7 @@ Supports Linux and macOS. In theory, it should work on Windows, but I currently 
 - `D`: Delete task
 - `P`: Postpone task (set due date tomorrow if task has existing due date)
 - `f`: Focus search field (`enter` to focus task list)
+  - `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`: Inserts priority A, B, C, D, E, F, G, H or I in search field to quickly filter by priority
 - `r`: Reset search/Refresh task list
 - `u`: Open URL in focused task
     - If task has multiple URLs, press `u` followed by e.g. `2` to open the second URL

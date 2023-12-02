@@ -1228,6 +1228,19 @@ class Body(urwid.ListBox):
         global __focused_task_index__
         global __focused_task_text__
 
+        # Dict: Qickly filter (search) tasks by priority
+        key_mapping_filter_priority = {
+            '1': '(A)',
+            '2': '(B)',
+            '3': '(C)',
+            '4': '(D)',
+            '5': '(E)',
+            '6': '(F)',
+            '7': '(G)',
+            '8': '(H)',
+            '9': '(I)'
+        }
+
         # Determine the OS type for URL opening
         os_type = platform.system()
         # Get the current time for detecting rapid keypresses
@@ -1376,6 +1389,19 @@ class Body(urwid.ListBox):
             self.toggle_display_hidden_tasks_setting()
             self.refresh_displayed_tasks()
             self.focus_on_specific_task(__focused_task_text__)
+
+        # Quickly sort list by priority
+        if key in key_mapping_filter_priority:
+            # Set focus to the search bar
+            self.main_frame.set_focus('header')
+            search_widget = self.main_frame.header.original_widget
+            # Clear the content of the search bar and insert the mapped text
+            search_widget.set_edit_text(key_mapping_filter_priority[key])
+            # Switch focus back to the body
+            self.main_frame.set_focus('body')
+            # If there are tasks, focus on the first task using focus_on_specific_task
+            if len(self.body) > 1:
+                self.focus_on_specific_task(1)
 
         # Pass the keypress event to the parent class if no match is found
         else:
