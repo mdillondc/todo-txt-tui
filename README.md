@@ -22,7 +22,7 @@ Supports Linux and macOS. In theory, it should work on Windows, but I currently 
 - **Sorting**: Tasks sorted by due date, priority and alphabetical (in that order).
 - **Due Dates**: Tasks can have due dates and are grouped by them.
     - **Natural Language Processing (NLP)**: For example, `due:tomorrow`.
-- **Threshold Dates**: Deferred tasks.
+- **Threshold Dates**: [Deferred tasks](todo.txt.md#threshold-dates).
 - **Recurring tasks**: Tasks can have a recurrence pattern, automatically creating new tasks upon completion. For example `rec:1d` or `rec:+1y`.
 - **Projects/Contexts**: With autosuggestions and autocompletion.
 - **Search**: Quickly find the tasks you're looking for.
@@ -58,7 +58,8 @@ Supports Linux and macOS. In theory, it should work on Windows, but I currently 
   - `0`: Reset display
 - `SHIFT + [1-9]`: Set priority A, B, C, D, E, F, G, H or I on focused task
   - `SHIFT + 0`: Remove priority from focused task 
-- `h`: Toggle hidden tasks (hide tasks with `h:1`)
+- `t`: Toggle visibility of tasks with threshold in future 
+- `h`: Toggle visibility of hidden tasks
   - `H`: Display only hidden tasks and hide all others
 - `q`: Quit application
 

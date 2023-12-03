@@ -63,6 +63,10 @@ Example: `Hello world +server @pc`.
 
 ## Threshold Dates
 
+Threshold is set with `t:`. E.g. `Task t:2024-10-10`. That means the task won't become visible until `2024-10-10`.
+
+Thresholds can be combined with recurrences and due dates.
+
 ### Strict-mode Recurrence
 
 - **Behavior**: The recurrence interval is added to both the due and threshold dates.
