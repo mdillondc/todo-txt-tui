@@ -60,7 +60,6 @@ Supports Linux and macOS. In theory, it should work on Windows, but I currently 
   - `SHIFT + 0`: Remove priority from focused task 
 - `t`: Toggle visibility of tasks with threshold in future 
 - `h`: Toggle visibility of hidden tasks
-  - `H`: Display only hidden tasks and hide all others
 - `q`: Quit application
 
 ## Configuration
