@@ -156,7 +156,7 @@ SETTINGS = [
     ('hideCompletionAndCreationDates', 'true'),
     ('placeCursorBeforeMetadataWhenEditingTasks', 'false'),
     ('displayHiddenTasksByDefault', 'false'),
-    ('hideTasksWithThresholdDates', 'false')
+    ('hideTasksWithThresholdDates', 'true')
 ]
 
 if os.path.exists(settings_path):
