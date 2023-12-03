@@ -61,6 +61,29 @@ This is a `+project` and this is a `@context`.
 
 Example: `Hello world +server @pc`.
 
+## Threshold Dates
+
+### Strict-mode Recurrence
+
+- **Behavior**: The recurrence interval is added to both the due and threshold dates.
+- **Example**:
+    - Task: `"2021-01-01 taxes are due in a month t:2021-03-30 due:2021-04-30 rec:+1y"`
+    - On completion (e.g., on 2021-04-15), the task is marked complete and a new task is created:
+        - Completed Task: `"x 2021-04-15 2021-01-01 taxes are due in a month t:2021-03-30 due:2021-04-30 rec:+1y"`
+        - New Task: `"2021-04-15 taxes are due in a month t:2022-03-30 due:2022-04-30 rec:+1y"`
+
+### Non-strict Mode Recurrence
+
+- **Behavior**: 
+    - Calculate the number of days between the threshold (`t`) and due (`due`) dates.
+    - Increment `due` by the recurrence interval.
+    - Update `t` to preserve the initial window between `t` and `due`.
+- **Example**:
+    - Task: `"2021-07-05 Water plants @home +quick due:2021-07-19 t:2021-07-09 rec:14d"`
+    - On completion (e.g., on 2021-07-13), the task is marked complete and a new task is created:
+        - Completed Task: `"x 2021-07-13 2021-07-05 Water plants @home +quick due:2021-07-19 t:2021-07-09 rec:14d"`
+        - New Task: `"2021-07-13 Water plants @home +quick due:2021-07-27 t:2021-07-17 rec:14d"`
+
 ## Task normalization/reconstruction
 
 Automatically fixes mangled tasks. 

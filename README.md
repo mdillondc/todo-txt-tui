@@ -22,6 +22,7 @@ Supports Linux and macOS. In theory, it should work on Windows, but I currently 
 - **Sorting**: Tasks sorted by due date, priority and alphabetical (in that order).
 - **Due Dates**: Tasks can have due dates and are grouped by them.
     - **Natural Language Processing (NLP)**: For example, `due:tomorrow`.
+- **Threshold Dates**: Deferred tasks.
 - **Recurring tasks**: Tasks can have a recurrence pattern, automatically creating new tasks upon completion. For example `rec:1d` or `rec:+1y`.
 - **Projects/Contexts**: With autosuggestions and autocompletion.
 - **Search**: Quickly find the tasks you're looking for.
@@ -75,7 +76,8 @@ This is optional.
     ["enableCompletionAndCreationDates", "true"],
     ["hideCompletionAndCreationDates", "true"], 
     ["placeCursorBeforeMetadataWhenEditingTasks", "false"],
-    ["displayHiddenTasksByDefault", "false"]
+    ["displayHiddenTasksByDefault", "false"],
+    ["hideTasksWithThresholdDates", "true"]
 ]
 ```
 

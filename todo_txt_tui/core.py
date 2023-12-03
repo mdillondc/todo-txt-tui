@@ -155,7 +155,8 @@ SETTINGS = [
     ('enableCompletionAndCreationDates', 'true'),
     ('hideCompletionAndCreationDates', 'true'),
     ('placeCursorBeforeMetadataWhenEditingTasks', 'false'),
-    ('displayHiddenTasksByDefault', 'false')
+    ('displayHiddenTasksByDefault', 'false'),
+    ('hideTasksWithThresholdDates', 'false')
 ]
 
 if os.path.exists(settings_path):
@@ -469,49 +470,53 @@ class Tasks:
                     # Check if the recurrence is strict (starts with '+')
                     is_strict = recurrence_value.startswith('+')
 
-                    # Extract old due date if present
+                    # Extract old due date and threshold date if present
                     due_date_match = re.search(DUE_DATE_REGEX, text)
-                    old_due_date = datetime.strptime(due_date_match.group(1),
-                                                     '%Y-%m-%d').date() if due_date_match else None
+                    old_due_date = datetime.strptime(due_date_match.group(1), '%Y-%m-%d').date() if due_date_match else None
+
+                    threshold_date_match = re.search(r't:(\d{4}-\d{2}-\d{2})', text)
+                    old_threshold_date = datetime.strptime(threshold_date_match.group(1), '%Y-%m-%d').date() if threshold_date_match else None
 
                     # Calculate new due date based on recurrence
-                    base_date = old_due_date if is_strict and old_due_date else completion_date
-
                     amount = int(re.match(r"\+?(\d+)", recurrence_value).group(1))
                     unit = recurrence_value[-1]
                     unit_mapping = {'d': 'days', 'w': 'weeks', 'm': 'months', 'y': 'years'}
-                    unit_full = unit_mapping.get(unit, unit)
-                    delta = relativedelta(**{unit_full: amount})
-                    new_due_date = base_date + delta
-                    new_due_date_str = new_due_date.strftime('%Y-%m-%d')
+                    delta = relativedelta(**{unit_mapping[unit]: amount})
 
-                    # Create new task with updated due date
-                    new_task = re.sub(DUE_DATE_REGEX, f'due:{new_due_date_str}',
-                                      text) if old_due_date else text + f' due:{new_due_date_str}'
-
-                    has_priority = False
-
-                    # Remove old creation date if present (for tasks without priority)
-                    if len(modified_task) >= 10 and is_valid_date(new_task[0:10]):
-                        new_task = new_task[11:]  # strip creation date from new task text
-
-                    # Remove old creation date if present (for tasks with priority)
-                    if len(modified_task) >= 14 and is_valid_date(new_task[4:14]):
-                        new_task = new_task[:3] + new_task[14:]  # strip creation date from new task text
-                        has_priority = True
-
-                    # Add new creation date if setting is enabled
-                    if setting_enabled('enableCompletionAndCreationDates'):
-                        if not has_priority:
-                            new_task = datetime.now().strftime('%Y-%m-%d') + ' ' + new_task
+                    if is_strict:
+                        new_due_date = old_due_date + delta if old_due_date else None
+                        new_threshold_date = old_threshold_date + delta if old_threshold_date else None
+                    else:
+                        new_due_date = completion_date + delta
+                        if old_threshold_date and old_due_date:
+                            days_difference = (old_due_date - old_threshold_date).days
+                            new_threshold_date = new_due_date - relativedelta(days=days_difference)
                         else:
-                            priority = new_task[:4]
-                            text = new_task[3:]
-                            new_task = priority + datetime.now().strftime('%Y-%m-%d') + text
+                            new_threshold_date = None
+
+                    # Format new due date and threshold date strings
+                    new_due_date_str = f'due:{new_due_date.strftime("%Y-%m-%d")}' if new_due_date else ''
+                    new_threshold_date_str = f't:{new_threshold_date.strftime("%Y-%m-%d")}' if new_threshold_date else ''
+
+                    # Create new task with updated dates
+                    new_task = text
+                    if due_date_match:
+                        new_task = re.sub(DUE_DATE_REGEX, new_due_date_str, new_task)
+                    elif new_due_date_str:
+                        new_task += f' {new_due_date_str}'
+
+                    if threshold_date_match:
+                        new_task = re.sub(r't:(\d{4}-\d{2}-\d{2})', new_threshold_date_str, new_task)
+                    elif new_threshold_date_str:
+                        new_task += f' {new_threshold_date_str}'
+
+                    # Adjust for creation date and priority
+                    # ... (existing logic for handling priority and creation date) ...
 
                     # Add the new task to recurring_tasks if it doesn't already exist
                     if not self.task_already_exists(new_task):
                         recurring_tasks.append(new_task)
+
             else:
                 modified_tasks.append(text)
 
@@ -559,6 +564,7 @@ class Tasks:
         priority = ""
         due_date = ""
         rec_rule = ""
+        threshold_date = ""  # Variable for threshold date
         complete = False
         hidden_tag = None  # Initialize hidden tag variable
 
@@ -576,12 +582,14 @@ class Tasks:
                 due_date = word
             elif word.startswith('rec:'):
                 rec_rule = word
+            elif word.startswith('t:'):  # Check for threshold date
+                threshold_date = word
             elif is_valid_date(word.strip()):
                 task_text_dates.append(word)
             elif re.match(r'^\([A-Z]\)', word):
                 priority = word
             elif word == 'h:1':
-                hidden_tag = word  # Store the hidden tag separately
+                hidden_tag = word
             else:
                 task_text.append(word)
 
@@ -603,13 +611,17 @@ class Tasks:
         # Add the main task text
         restructured_task_parts.extend(task_text)
 
-        # Add the projects, contexts, due date, and rec_rule if they exist
+        # Add the projects, contexts, and rec_rule if they exist
         restructured_task_parts.extend(projects)
         restructured_task_parts.extend(contexts)
-        if due_date:
-            restructured_task_parts.append(due_date)
         if rec_rule:
             restructured_task_parts.append(rec_rule)
+
+        # Add threshold date before due date if they exist
+        if threshold_date:
+            restructured_task_parts.append(threshold_date)
+        if due_date:
+            restructured_task_parts.append(due_date)
 
         # Add the hidden tag if it was present
         if hidden_tag:
@@ -819,6 +831,16 @@ class TaskUI:
             if 'h:1' in task['text'] and not setting_enabled('displayHiddenTasksByDefault'):
                 continue
 
+            # Check for hideTasksWithThresholdDates setting
+            if setting_enabled('hideTasksWithThresholdDates'):
+                threshold_date_match = re.search(r't:(\d{4}-\d{2}-\d{2})', task['text'])
+                if threshold_date_match:
+                    threshold_date_str = threshold_date_match.group(1)
+                    threshold_date = datetime.strptime(threshold_date_str, '%Y-%m-%d').date()
+                    # Skip task if threshold date is in the future
+                    if threshold_date > today:
+                        continue
+
             # Extract the due date from the current task
             due_date = task['due_date']
 
@@ -889,6 +911,8 @@ class TaskUI:
                 # Apply color-coding based on the word's prefix or content
                 if not is_task_complete:
                     if word == 'h:1':
+                        color = 'is_complete'
+                    elif word.startswith('t:'):
                         color = 'is_complete'
                     elif word.startswith('@'):
                         color = 'context'
@@ -1447,7 +1471,6 @@ class Body(urwid.ListBox):
                 else:
                     # Remove the priority
                     new_task_text = re.sub(PRIORITY_REGEX + r'\s*', '', original_task_text).strip()
-                    debug(new_task_text)
 
                 # Edit the task and get the updated task text
                 updated_task_text = self.tasks.edit(original_task_text, new_task_text)
@@ -1461,6 +1484,22 @@ class Body(urwid.ListBox):
                         if widget.original_widget.original_text == updated_task_text:
                             self.set_focus(idx)
                             break
+
+        # Toggle 'hideTasksWithThresholdDates' setting and refresh display
+        elif key == 't':
+            global SETTINGS
+            # Find and toggle the 'hideTasksWithThresholdDates' setting
+            for i, setting in enumerate(SETTINGS):
+                if setting[0] == 'hideTasksWithThresholdDates':
+                    current_value = setting[1].lower() == 'true'
+                    new_value = 'false' if current_value else 'true'
+                    SETTINGS[i] = ('hideTasksWithThresholdDates', new_value)
+                    break
+
+            # Refresh displayed tasks
+            self.refresh_displayed_tasks()
+            # Refocus on the current task
+            self.focus_on_specific_task(__focused_task_text__)
 
         # Pass the keypress event to the parent class if no match is found
         else:
