@@ -49,13 +49,16 @@ Supports Linux and macOS. In theory, it should work on Windows, but I currently 
 - `D`: Delete task
 - `P`: Postpone task (set due date tomorrow if task has existing due date)
 - `f`: Focus search field (`enter` to focus task list)
-  - `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`: Inserts priority A, B, C, D, E, F, G, H or I in search field to quickly filter by priority
 - `r`: Reset search/Refresh task list
 - `u`: Open URL in focused task
     - If task has multiple URLs, press `u` followed by e.g. `2` to open the second URL
     - `U` Open all URLs in task
-- `h`: Toggle hidden tasks contain the word `h:1`
-  - Hidden by default, but can be changed in [Configuration](#configuration)
+- `[1-9]`: Display only tasks with priority A, B, C, D, E, F, G, H or I
+  - `0`: Reset display
+- `SHIFT + [1-9]`: Set priority A, B, C, D, E, F, G, H or I on focused task
+  - `SHIFT + 0`: Remove priority from focused task 
+- `h`: Toggle hidden tasks (hide tasks with `h:1`)
+  - `H`: Display only hidden tasks and hide all others
 - `q`: Quit application
 
 ## Configuration

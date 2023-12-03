@@ -310,6 +310,17 @@ class Tasks:
 
     # Edits an existing task in the task file
     def edit(self, old_task, new_task):
+        """
+        Edits an existing task in the task file. Returns the updated task text after restructuring.
+
+        Parameters:
+        old_task (str): The original task text.
+        new_task (str): The modified task text.
+
+        Returns:
+        str: The updated task text after restructuring.
+        """
+
         # Normalize both the old and new tasks
         normalized_old_task = self.normalize_task(old_task)
         normalized_new_task = self.normalize_task(new_task)
@@ -330,6 +341,12 @@ class Tasks:
         # Write the updated tasks back to the file
         with open(self.txt_file, 'w') as f:
             f.writelines(tasks)
+
+        # Restructure the updated task components
+        restructured_task = self.restructure_task_components(normalized_new_task)
+
+        # Return the restructured task text
+        return restructured_task
 
     def delete(self, task_text):
         # Normalize the task text for consistency
@@ -1228,7 +1245,7 @@ class Body(urwid.ListBox):
         global __focused_task_index__
         global __focused_task_text__
 
-        # Dict: Qickly filter (search) tasks by priority
+        # Dict: Qickly filter (search) tasks by priority [1-9]
         key_mapping_filter_priority = {
             '1': '(A)',
             '2': '(B)',
@@ -1239,6 +1256,21 @@ class Body(urwid.ListBox):
             '7': '(G)',
             '8': '(H)',
             '9': '(I)'
+        }
+
+        # Dict: Qickly set priority on focused task (SHIFT + [1-9]
+        key_mapping_set_priority = {
+            '!': '(A)',
+            '"': '(B)',
+            '#': '(C)',
+            '¤': '(D)',
+            '$': '(D)', # macOS
+            '%': '(E)',
+            '&': '(F)',
+            '/': '(G)',
+            '(': '(H)',
+            ')': '(I)',
+            '=': None
         }
 
         # Determine the OS type for URL opening
@@ -1315,7 +1347,7 @@ class Body(urwid.ListBox):
             self.main_frame.set_focus('header')
 
         # Refresh the task list and clear the search field
-        elif key == 'r':
+        elif key in ['r', '0']:
             self.refresh_displayed_tasks()
             search_widget = self.main_frame.header.original_widget
             search_widget.set_edit_text('')
@@ -1402,6 +1434,33 @@ class Body(urwid.ListBox):
             # If there are tasks, focus on the first task using focus_on_specific_task
             if len(self.body) > 1:
                 self.focus_on_specific_task(1)
+
+        # Quickly sort list by priority
+        if key in key_mapping_set_priority:
+            focused_widget = self.body.get_focus()[0]
+            if hasattr(focused_widget, 'original_widget') and isinstance(focused_widget.original_widget, CustomCheckBox):
+                original_task_text = focused_widget.original_widget.original_text
+
+                if key_mapping_set_priority[key] is not None:
+                    # Add or modify the priority
+                    new_task_text = re.sub(PRIORITY_REGEX + r'\s*', '', original_task_text).strip() + " " + key_mapping_set_priority[key]
+                else:
+                    # Remove the priority
+                    new_task_text = re.sub(PRIORITY_REGEX + r'\s*', '', original_task_text).strip()
+                    debug(new_task_text)
+
+                # Edit the task and get the updated task text
+                updated_task_text = self.tasks.edit(original_task_text, new_task_text)
+
+                # Refresh the displayed tasks
+                self.refresh_displayed_tasks()
+
+                # Refocus using the updated task text
+                for idx, widget in enumerate(self.body):
+                    if hasattr(widget, 'original_widget') and isinstance(widget.original_widget, CustomCheckBox):
+                        if widget.original_widget.original_text == updated_task_text:
+                            self.set_focus(idx)
+                            break
 
         # Pass the keypress event to the parent class if no match is found
         else:
