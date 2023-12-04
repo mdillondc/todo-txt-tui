@@ -472,10 +472,12 @@ class Tasks:
 
                     # Extract old due date and threshold date if present
                     due_date_match = re.search(DUE_DATE_REGEX, text)
-                    old_due_date = datetime.strptime(due_date_match.group(1), '%Y-%m-%d').date() if due_date_match else None
+                    old_due_date = datetime.strptime(due_date_match.group(1),
+                                                     '%Y-%m-%d').date() if due_date_match else None
 
                     threshold_date_match = re.search(r't:(\d{4}-\d{2}-\d{2})', text)
-                    old_threshold_date = datetime.strptime(threshold_date_match.group(1), '%Y-%m-%d').date() if threshold_date_match else None
+                    old_threshold_date = datetime.strptime(threshold_date_match.group(1),
+                                                           '%Y-%m-%d').date() if threshold_date_match else None
 
                     # Calculate new due date based on recurrence
                     amount = int(re.match(r"\+?(\d+)", recurrence_value).group(1))
@@ -510,8 +512,25 @@ class Tasks:
                     elif new_threshold_date_str:
                         new_task += f' {new_threshold_date_str}'
 
-                    # Adjust for creation date and priority
-                    # ... (existing logic for handling priority and creation date) ...
+                    has_priority = False
+
+                    # Remove old creation date if present (for tasks without priority)
+                    if len(modified_task) >= 10 and is_valid_date(new_task[0:10]):
+                        new_task = new_task[11:]  # strip creation date from new task text
+
+                    # Remove old creation date if present (for tasks with priority)
+                    if len(modified_task) >= 14 and is_valid_date(new_task[4:14]):
+                        new_task = new_task[:3] + new_task[14:]  # strip creation date from new task text
+                        has_priority = True
+
+                    # Add new creation date if setting is enabled
+                    if setting_enabled('enableCompletionAndCreationDates'):
+                        if not has_priority:
+                            new_task = datetime.now().strftime('%Y-%m-%d') + ' ' + new_task
+                        else:
+                            priority = new_task[:4]
+                            text = new_task[3:]
+                            new_task = priority + datetime.now().strftime('%Y-%m-%d') + text
 
                     # Add the new task to recurring_tasks if it doesn't already exist
                     if not self.task_already_exists(new_task):
@@ -1288,7 +1307,7 @@ class Body(urwid.ListBox):
             '"': '(B)',
             '#': '(C)',
             '¤': '(D)',
-            '$': '(D)', # macOS
+            '$': '(D)',  # macOS
             '%': '(E)',
             '&': '(F)',
             '/': '(G)',
@@ -1462,12 +1481,14 @@ class Body(urwid.ListBox):
         # Quickly sort list by priority
         if key in key_mapping_set_priority:
             focused_widget = self.body.get_focus()[0]
-            if hasattr(focused_widget, 'original_widget') and isinstance(focused_widget.original_widget, CustomCheckBox):
+            if hasattr(focused_widget, 'original_widget') and isinstance(focused_widget.original_widget,
+                                                                         CustomCheckBox):
                 original_task_text = focused_widget.original_widget.original_text
 
                 if key_mapping_set_priority[key] is not None:
                     # Add or modify the priority
-                    new_task_text = re.sub(PRIORITY_REGEX + r'\s*', '', original_task_text).strip() + " " + key_mapping_set_priority[key]
+                    new_task_text = re.sub(PRIORITY_REGEX + r'\s*', '', original_task_text).strip() + " " + \
+                                    key_mapping_set_priority[key]
                 else:
                     # Remove the priority
                     new_task_text = re.sub(PRIORITY_REGEX + r'\s*', '', original_task_text).strip()
