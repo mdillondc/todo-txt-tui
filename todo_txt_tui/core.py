@@ -1288,21 +1288,8 @@ class Body(urwid.ListBox):
         global __focused_task_index__
         global __focused_task_text__
 
-        # Dict: Qickly filter (search) tasks by priority [1-9]
+        # Dict: Qickly filter (search) tasks by priority SHIFT + [1-9]
         key_mapping_filter_priority = {
-            '1': '(A)',
-            '2': '(B)',
-            '3': '(C)',
-            '4': '(D)',
-            '5': '(E)',
-            '6': '(F)',
-            '7': '(G)',
-            '8': '(H)',
-            '9': '(I)'
-        }
-
-        # Dict: Qickly set priority on focused task (SHIFT + [1-9]
-        key_mapping_set_priority = {
             '!': '(A)',
             '"': '(B)',
             '#': '(C)',
@@ -1313,8 +1300,22 @@ class Body(urwid.ListBox):
             '/': '(G)',
             '(': '(H)',
             ')': '(I)',
-            '=': None
         }
+
+        # Dict: Qickly set priority on focused task
+        #key_mapping_set_priority = {
+        #    '!': '(A)',
+        #    '"': '(B)',
+        #    '#': '(C)',
+        #    '¤': '(D)',
+        #    '$': '(D)',  # macOS
+        #    '%': '(E)',
+        #    '&': '(F)',
+        #    '/': '(G)',
+        #    '(': '(H)',
+        #    ')': '(I)',
+        #    '=': None
+        #}
 
         # Determine the OS type for URL opening
         os_type = platform.system()
@@ -1390,7 +1391,7 @@ class Body(urwid.ListBox):
             self.main_frame.set_focus('header')
 
         # Refresh the task list and clear the search field
-        elif key in ['r', '0']:
+        elif key in ['r', '=']:
             self.refresh_displayed_tasks()
             search_widget = self.main_frame.header.original_widget
             search_widget.set_edit_text('')
@@ -1410,7 +1411,7 @@ class Body(urwid.ListBox):
             self.focus_on_specific_task(__focused_task_index__)
 
         # Open the URLs of the currently focused task
-        elif key == 'o':
+        elif key == 'u':
             focused_widget, _ = self.get_focus()
             if hasattr(focused_widget, 'original_widget') and isinstance(focused_widget.original_widget,
                                                                          urwid.CheckBox):
@@ -1444,7 +1445,7 @@ class Body(urwid.ListBox):
             self.pending_url_choice = None
 
         # Open all URLs of the currently focused task
-        elif key == 'O':
+        elif key == 'U':
             focused_widget, _ = self.get_focus()
             if hasattr(focused_widget, 'original_widget') and isinstance(focused_widget.original_widget,
                                                                          urwid.CheckBox):
@@ -1478,33 +1479,33 @@ class Body(urwid.ListBox):
             if len(self.body) > 1:
                 self.focus_on_specific_task(1)
 
-        # Quickly sort list by priority
-        if key in key_mapping_set_priority:
-            focused_widget = self.body.get_focus()[0]
-            if hasattr(focused_widget, 'original_widget') and isinstance(focused_widget.original_widget,
-                                                                         CustomCheckBox):
-                original_task_text = focused_widget.original_widget.original_text
-
-                if key_mapping_set_priority[key] is not None:
-                    # Add or modify the priority
-                    new_task_text = re.sub(PRIORITY_REGEX + r'\s*', '', original_task_text).strip() + " " + \
-                                    key_mapping_set_priority[key]
-                else:
-                    # Remove the priority
-                    new_task_text = re.sub(PRIORITY_REGEX + r'\s*', '', original_task_text).strip()
-
-                # Edit the task and get the updated task text
-                updated_task_text = self.tasks.edit(original_task_text, new_task_text)
-
-                # Refresh the displayed tasks
-                self.refresh_displayed_tasks()
-
-                # Refocus using the updated task text
-                for idx, widget in enumerate(self.body):
-                    if hasattr(widget, 'original_widget') and isinstance(widget.original_widget, CustomCheckBox):
-                        if widget.original_widget.original_text == updated_task_text:
-                            self.set_focus(idx)
-                            break
+        # Quickly set priority on focused task
+        #if key in key_mapping_set_priority:
+        #    focused_widget = self.body.get_focus()[0]
+        #    if hasattr(focused_widget, 'original_widget') and isinstance(focused_widget.original_widget,
+        #                                                                 CustomCheckBox):
+        #        original_task_text = focused_widget.original_widget.original_text
+        #
+        #        if key_mapping_set_priority[key] is not None:
+        #            # Add or modify the priority
+        #            new_task_text = re.sub(PRIORITY_REGEX + r'\s*', '', original_task_text).strip() + " " + \
+        #                            key_mapping_set_priority[key]
+        #        else:
+        #            # Remove the priority
+        #            new_task_text = re.sub(PRIORITY_REGEX + r'\s*', '', original_task_text).strip()
+        #
+        #        # Edit the task and get the updated task text
+        #        updated_task_text = self.tasks.edit(original_task_text, new_task_text)
+        #
+        #        # Refresh the displayed tasks
+        #        self.refresh_displayed_tasks()
+        #
+        #        # Refocus using the updated task text
+        #        for idx, widget in enumerate(self.body):
+        #            if hasattr(widget, 'original_widget') and isinstance(widget.original_widget, CustomCheckBox):
+        #                if widget.original_widget.original_text == updated_task_text:
+        #                    self.set_focus(idx)
+        #                    break
 
         # Toggle 'hideTasksWithThresholdDates' setting and refresh display
         elif key == 't':
