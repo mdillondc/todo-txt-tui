@@ -26,7 +26,7 @@ def is_valid_date(string):
         return False
 
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 __package__ = 'todo-txt-tui'
 __sync_refresh_rate__ = 2
 __track_focused_task_interval__ = .1
@@ -1333,8 +1333,6 @@ class Body(urwid.ListBox):
         # Update state to keep track of double keypresses, e.g. `gg`
         self.last_key = key
         self.last_key_time = current_time
-
-        debug(key)
 
         # Navigate to the bottom of the list
         if key == 'G':
