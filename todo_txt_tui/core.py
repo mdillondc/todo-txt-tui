@@ -61,7 +61,7 @@ def check_for_updates(loop, keymap_instance):
 
                         os.system('clear')
                         sys.exit(
-                            f"\nUpdate completed.\nIf the update failed, update manually: pip3 install --upgrade {__package__}")
+                            f"\nUpdate completed.")
                     if key in ['esc']:
                         keymap_instance.main_frame.body = keymap_instance.tasklist_decorations
 
