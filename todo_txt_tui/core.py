@@ -1334,6 +1334,8 @@ class Body(urwid.ListBox):
         self.last_key = key
         self.last_key_time = current_time
 
+        debug(key)
+
         # Navigate to the bottom of the list
         if key == 'G':
             self.set_focus(len(self.body) - 1)
@@ -1410,7 +1412,7 @@ class Body(urwid.ListBox):
             self.focus_on_specific_task(__focused_task_index__)
 
         # Open the URLs of the currently focused task
-        elif key == 'u':
+        elif key == 'o':
             focused_widget, _ = self.get_focus()
             if hasattr(focused_widget, 'original_widget') and isinstance(focused_widget.original_widget,
                                                                          urwid.CheckBox):
@@ -1444,7 +1446,7 @@ class Body(urwid.ListBox):
             self.pending_url_choice = None
 
         # Open all URLs of the currently focused task
-        elif key == 'U':
+        elif key == 'O':
             focused_widget, _ = self.get_focus()
             if hasattr(focused_widget, 'original_widget') and isinstance(focused_widget.original_widget,
                                                                          urwid.CheckBox):

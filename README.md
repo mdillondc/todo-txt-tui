@@ -51,9 +51,9 @@ Supports Linux and macOS. In theory, it should work on Windows, but I currently 
 - `P`: Postpone task (set due date tomorrow if task has existing due date)
 - `f`: Focus search field (`enter` to focus task list)
 - `r`: Reset search/Refresh task list
-- `u`: Open URL in focused task
-    - If task has multiple URLs, press `u` followed by e.g. `2` to open the second URL
-    - `U` Open all URLs in task
+- `o`: Open URL in focused task
+    - If task has multiple URLs, press `o` followed by e.g. `2` to open the second URL
+    - `O` Open all URLs in task
 - `[1-9]`: Display only tasks with priority A, B, C, D, E, F, G, H or I
   - `0`: Reset display
 - `SHIFT + [1-9]`: Set priority A, B, C, D, E, F, G, H or I on focused task
