@@ -630,17 +630,19 @@ class Tasks:
         # Add the main task text
         restructured_task_parts.extend(task_text)
 
-        # Add the projects, contexts, and rec_rule if they exist
+        # Add the projects, contexts if they exist
         restructured_task_parts.extend(projects)
         restructured_task_parts.extend(contexts)
+
+        # Modify here: Add due date before recurrence rule if they exist
+        if due_date:
+            restructured_task_parts.append(due_date)
         if rec_rule:
             restructured_task_parts.append(rec_rule)
 
-        # Add threshold date before due date if they exist
+        # Add threshold date if it exists
         if threshold_date:
             restructured_task_parts.append(threshold_date)
-        if due_date:
-            restructured_task_parts.append(due_date)
 
         # Add the hidden tag if it was present
         if hidden_tag:
