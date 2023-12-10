@@ -43,7 +43,7 @@ Supports Linux and macOS. In theory, it should work on Windows, but I currently 
 - `G`: Go to bottom of list
 - `n`: Add new task (`enter` to save, `esc` to dismiss)
 - `e`: Edit existing task (`enter` to save, `esc` to dismiss)
-  - `tab`: Autocomplete suggested
+  - `tab`: Autocomplete suggested projects and contexts
 - `E`: Edit existing task, but place cursor at the end of [task text component](todo.txt.md#task-structure) instead of end of entire task 
 - `x`: Toggle task complete/incomplete
 - `X`: Complete and archive task immediately
