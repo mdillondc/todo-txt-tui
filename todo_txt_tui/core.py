@@ -979,17 +979,20 @@ class TaskUI:
         # Return a Pile widget containing all the task widgets
         return urwid.Pile(widgets)
 
-    def open_task_add_edit_dialog(keymap_instance, size, default_text=None):
+    def open_task_add_edit_dialog(keymap_instance, title, default_text=None, place_cursor_at_end=True):
         """
         Opens a dialog for adding or editing a task.
 
         Parameters:
-        keymap_instance: Instance of the Keymap class, which handles key mapping and UI updates.
-        size: Size of the dialog (not used in this function but kept for consistency).
-        default_text: Default text to populate the edit field with, used for editing existing tasks.
+        keymap_instance: Instance of the Keymap class, handling key mapping and UI updates.
+        title: Title for the dialog.
+        default_text: Text to pre-fill in the edit dialog, useful for editing tasks.
+        place_cursor_at_end: Flag to determine where to place the cursor.
+                             If True, place at the end of the entire task.
+                             If False, place at the end of the task text component.
 
         Returns:
-        None: This function manipulates the UI but does not return a value.
+        None: This function updates the UI but does not return a value.
         """
 
         # Initialize Tasks instance
@@ -1013,26 +1016,27 @@ class TaskUI:
         # Initialize urwid Edit widget
         ask = urwid.Edit()
 
+        # Function to identify the end of the task text component
         def find_task_text_end(task_text):
-            # Identifiers for project, context, due date, and recurrence
-            identifiers = [' +', ' @', ' due:', ' rec:']
-            # Find the first occurrence of any identifier
+            # List of possible identifiers that mark the beginning of task metadata
+            identifiers = [' +', ' @', ' due:', ' rec:', ' t:', ' h:']
+
+            # Find the first occurrence of any metadata identifier, default to the full length of the text
             first_identifier_pos = min([task_text.find(idf) for idf in identifiers if task_text.find(idf) != -1],
                                        default=len(task_text))
             return first_identifier_pos
 
         # If default_text is provided, pre-fill the Edit widget
         if default_text:
-            if setting_enabled('placeCursorBeforeMetadataWhenEditingTasks'):
+            if not place_cursor_at_end:
+                # Find the end of the task text component
                 cursor_pos = find_task_text_end(default_text)
-                # Insert a space before the cursor position
-                default_text_with_space = default_text[:cursor_pos] + ' ' + default_text[cursor_pos:]
-                ask.set_edit_text(default_text_with_space)
-                # Set the cursor position to one after the inserted space
-                ask.set_edit_pos(cursor_pos + 1)
-            else:
                 ask.set_edit_text(default_text)
-                # Place the cursor at the end of the text
+                # Set cursor at the end of the task text component
+                ask.set_edit_pos(cursor_pos)
+            else:
+                # For the case of 'e', simply place the cursor at the end of the entire task
+                ask.set_edit_text(default_text)
                 ask.set_edit_pos(len(default_text))
 
         # Create BoxAdapter to hold suggestions with a height of 1
@@ -1357,11 +1361,32 @@ class Body(urwid.ListBox):
 
         # Edit the currently focused task
         elif key == 'e':
+            # Get the currently focused widget in the body
             focused_widget = self.body.get_focus()[0]
-            if hasattr(focused_widget, 'original_widget') and isinstance(focused_widget.original_widget,
-                                                                         CustomCheckBox):
-                task_text = focused_widget.original_widget.original_text  # Get original text from CustomCheckBox
-                dialog = TaskUI.open_task_add_edit_dialog(self, "Edit Task", task_text)
+
+            # Check if the focused widget is a CustomCheckBox
+            if hasattr(focused_widget, 'original_widget') and isinstance(focused_widget.original_widget, CustomCheckBox):
+                # Retrieve the original task text from the CustomCheckBox
+                task_text = focused_widget.original_widget.original_text
+
+                # Open the task edit dialog with cursor placed at the end of the entire task
+                dialog = TaskUI.open_task_add_edit_dialog(self, "Edit Task", task_text, place_cursor_at_end=True)
+
+                # After closing the dialog, update the tasks display
+                if dialog is not None:
+                    self.update_tasks()
+
+
+        # Edit the currently focused task but place cursor after task text
+        elif key == 'E':
+            # This branch is similar to the above, but handles the 'E' keypress
+            focused_widget = self.body.get_focus()[0]
+            if hasattr(focused_widget, 'original_widget') and isinstance(focused_widget.original_widget, CustomCheckBox):
+                task_text = focused_widget.original_widget.original_text
+
+                # Open the task edit dialog with cursor placed at the end of the task text component
+                dialog = TaskUI.open_task_add_edit_dialog(self, "Edit Task", task_text, place_cursor_at_end=False)
+
                 if dialog is not None:
                     self.update_tasks()
 

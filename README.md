@@ -22,17 +22,17 @@ Supports Linux and macOS. In theory, it should work on Windows, but I currently 
 - **Sorting**: Tasks sorted by due date, priority and alphabetical (in that order).
 - **Due Dates**: Tasks can have due dates and are grouped by them.
     - **Natural Language Processing (NLP)**: For example, `due:tomorrow`.
-- **Threshold Dates**: [Deferred tasks](todo.txt.md#threshold-dates).
+- **Threshold Dates**: Also known as deferred tasks. See [details](todo.txt.md#threshold-dates).
 - **Recurring tasks**: Tasks can have a recurrence pattern, automatically creating new tasks upon completion. For example `rec:1d` or `rec:+1y`.
 - **Projects/Contexts**: With autosuggestions and autocompletion.
 - **Search**: Quickly find the tasks you're looking for.
 - **Archiving**: Completed tasks can be moved to `done.txt`.
-- **Completion/Creation dates**: Enable or disable them. See [Configuration](#configuration).
+- **Completion/Creation dates**: Can be enabled or disabled in settings
 - **Markdown links**: Yes.
 - **Sync**: Changes made in todo.txt outside the application will be reflected in the app.
 - **Keyboard driven**: Navigate and manipulate everything from your keyboard with vim-inspired keys.
-- **Custom themes**: See [Configuration](#configuration).
-- **Hidden tasks**: See keybindings and [Configuration](#configuration)
+- **Custom themes**: Yes
+- **Hidden tasks**: Default visibility can be set in settings and toggled with `t`
 - Much more...
 
 ## Keybindings
@@ -44,6 +44,7 @@ Supports Linux and macOS. In theory, it should work on Windows, but I currently 
 - `n`: Add new task (`enter` to save, `esc` to dismiss)
 - `e`: Edit existing task (`enter` to save, `esc` to dismiss)
   - `tab`: Autocomplete suggested
+- `E`: Edit existing task, but place cursor at the end of [task text component](todo.txt.md#task-structure) instead of end of entire task 
 - `x`: Toggle task complete/incomplete
 - `X`: Complete and archive task immediately
 - `A`: Archive completed tasks to done.txt

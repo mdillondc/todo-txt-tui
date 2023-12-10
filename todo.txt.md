@@ -5,20 +5,22 @@ Note! This list does not explain every feature of TodoTxtTUI, but it does explai
 # Task structure
 
 ```
-x (A) 2024-01-20 2024-01-10 Verify harddrive health +personal @pc due:2023-01-20 rec:+1m 
+x (A) 2024-01-20 2024-01-10 Verify harddrive health +personal @pc t:2023-01-15 due:2023-01-20 rec:+1m 
 ```
 
-| Component                 | Explanation                               |
-|---------------------------|-------------------------------------------|
-| `x`                       | Indicates that the task is complete       |
-| `(A)`                     | The task has the highest priority         |
-| `2024-01-20`              | The task was completed on 2024-01-20      |
-| `2024-01-10`              | The task was created on 2024-01-10        |
-| `Verify harddrive health` | Task text                                 |
-| `+personal`               | Task project                              |
-| `@pc`                     | Task context                              |
-| `due:2023-01-20`          | Task is due 2024-01-20                    |
-| `rec:+1m`                 | Task will repeat on the 20th every month  |
+| Component                 | Explanation                              |
+|---------------------------|------------------------------------------|
+| `x`                       | Indicates that the task is complete      |
+| `(A)`                     | The task has the highest priority        |
+| `2024-01-20`              | The task was completed on 2024-01-20     |
+| `2024-01-10`              | The task was created on 2024-01-10       |
+| `Verify harddrive health` | Task text                                |
+| `+personal`               | Task project                             |
+| `@pc`                     | Task context                             |
+| `t:2023-01-15`            | Threshold date                           |
+| `due:2023-01-20`          | Task is due 2024-01-20                   |
+| `rec:+1m`                 | Task will repeat on the 20th every month |
+| `h:1`                     | Task is hidden                           |
 
 ## Priorities
 
