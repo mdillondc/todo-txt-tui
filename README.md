@@ -124,10 +124,6 @@ Make sure you have Python installed.
 pip3 install todo-txt-tui
 ```
 
-### Troubleshooting
-
-Mac users may have issues with their Python installation. See [troubleshooting](troubleshooting.md).
-
 ### How to update
 
 You will be notified if a new version is available, but you can update manually.
